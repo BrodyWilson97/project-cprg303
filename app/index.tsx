@@ -1,8 +1,25 @@
 import React from "react";
 import { View, Text, TextInput, TouchableOpacity, StyleSheet } from "react-native";
 import Checkbox from 'expo-checkbox';
+import { listFiles, streamFile } from "../lib/subabase_crud";
+import { useEffect, useState } from "react";
 
 export default function App() {
+
+  //for testing supabase stuff
+  const [file, setFile] = useState<string>("");
+
+  useEffect(() => {
+  const getData = async () => {
+    const data = await streamFile("musicfiles");
+
+    console.log(data);
+  };
+    getData();
+  }
+  , []);
+
+
     return (
       <View style={styles.container}>
         <Text style={styles.title}>Harmoniq</Text>
@@ -62,10 +79,10 @@ const styles = StyleSheet.create({
   form: {
     width: '100%',
     maxWidth: 400,
-    spaceY: 24,
+    marginBottom: 32,
   },
   inputGroup: {
-    spaceY: 8,
+    marginBottom: 32,
   },
   label: {
     fontSize: 14,
@@ -77,11 +94,10 @@ const styles = StyleSheet.create({
     borderColor: '#CBD5E0',
     borderWidth: 1,
     borderRadius: 8,
-    outline: 'none',
-    focus: {
-      borderColor: '#9F7AEA',
-      borderWidth: 2,
-    },
+    // focus: {
+    //   borderColor: '#9F7AEA',
+    //   borderWidth: 2,
+    // },
   },
   button: {
     width: '100%',
