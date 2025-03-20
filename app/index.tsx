@@ -11,7 +11,7 @@ export default function App() {
 
   useEffect(() => {
   const getData = async () => {
-    const data = await streamFile("musicfiles");
+    const data = await streamFile("musicfiles", "user", "sample-3s.mp3");
 
     console.log(data);
   };

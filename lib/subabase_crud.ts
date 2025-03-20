@@ -19,10 +19,10 @@ export async function listFiles(bucketName: string){
     return data;
 };
 
-export async function streamFile(bucketName: string){
+export async function streamFile(bucketName: string, folderName: string, fileName: string){
     const { data } = await supabase
   .storage
   .from(bucketName)
-  .getPublicUrl('user/sample-3s.mp3')
+  .getPublicUrl('${folderName}/${fileName}')
   return data;
 }
