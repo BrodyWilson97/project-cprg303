@@ -25,7 +25,7 @@ export default function App() {
       <Text style={styles.title}>Harmoniq</Text>
       <View style={styles.form}>
         <View style={styles.inputGroup}>
-          <Text style={styles.label}>Username</Text>
+          <Text style={styles.label}>Email</Text>
           <TextInput
             id="email"
             placeholder="Enter your email"
