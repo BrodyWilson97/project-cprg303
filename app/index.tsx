@@ -1,66 +1,70 @@
 import React from "react";
-import { View, Text, TextInput, TouchableOpacity, StyleSheet } from "react-native";
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, Pressable } from "react-native";
 import Checkbox from 'expo-checkbox';
-import { listFiles, streamFile } from "../lib/subabase_crud";
+import { signIn, signOut } from "../lib/supabase_auth";
 import { useEffect, useState } from "react";
+import { useRouter } from "expo-router";
 
 export default function App() {
+  const [email, setEmail] = useState<string>("");
+  const [password, setPassword] = useState<string>("");
+  const [loading, setLoading] = useState<boolean>(false);
 
-  //for testing supabase stuff
-  const [file, setFile] = useState<string>("");
+  const router = useRouter();
 
-  useEffect(() => {
-  const getData = async () => {
-    const data = await streamFile("musicfiles", "user", "sample-3s.mp3");
+  const handleSignIn = async () => {
+    setLoading(true);
+    signIn(email, password);
 
-    console.log(data);
+    setLoading(false);
+    router.push("/homePage");
   };
-    getData();
-  }
-  , []);
 
-
-    return (
-      <View style={styles.container}>
-        <Text style={styles.title}>Harmoniq</Text>
-        <View style={styles.form}>
-          <View style={styles.inputGroup}>
-            <Text style={styles.label}>Username</Text>
-            <TextInput
-              id="username"
-              placeholder="Enter your username"
-              style={styles.input}
-            />
+  return (
+    <View style={styles.container}>
+      <Text style={styles.title}>Harmoniq</Text>
+      <View style={styles.form}>
+        <View style={styles.inputGroup}>
+          <Text style={styles.label}>Username</Text>
+          <TextInput
+            id="email"
+            placeholder="Enter your email"
+            style={styles.input}
+            onChangeText={setEmail}
+          />
+        </View>
+        <View style={styles.inputGroup}>
+          <Text style={styles.label}>Password</Text>
+          <TextInput
+            id="password"
+            placeholder="Enter your password"
+            secureTextEntry
+            style={styles.input}
+            onChangeText={setPassword}
+          />
+        </View>
+        <TouchableOpacity style={styles.button} onPress={handleSignIn}>
+          <Text style={styles.buttonText}>Log In</Text>
+        </TouchableOpacity>
+        <View style={styles.checkboxGroup}>
+          <View style={styles.checkboxContainer}>
+            <Checkbox />
+            <Text style={styles.checkboxLabel}>Remember Username?</Text>
           </View>
-          <View style={styles.inputGroup}>
-            <Text style={styles.label}>Password</Text>
-            <TextInput
-              id="password"
-              placeholder="Enter your password"
-              secureTextEntry
-              style={styles.input}
-            />
-          </View>
-          <TouchableOpacity style={styles.button}>
-            <Text style={styles.buttonText}>Log In</Text>
-          </TouchableOpacity>
-          <View style={styles.checkboxGroup}>
-            <View style={styles.checkboxContainer}>
-              <Checkbox />
-              <Text style={styles.checkboxLabel}>Remember Username?</Text>
-            </View>
-            <View style={styles.checkboxContainer}>
-              <Checkbox />
-              <Text style={styles.checkboxLabel}>Remember Password?</Text>
-            </View>
-          </View>
-          <View style={styles.links}>
-            <Text style={styles.link}>Forgot Username?</Text>
-            <Text style={styles.link}>New User?</Text>
+          <View style={styles.checkboxContainer}>
+            <Checkbox />
+            <Text style={styles.checkboxLabel}>Remember Password?</Text>
           </View>
         </View>
+        <View style={styles.links}>
+          <Text style={styles.link}>Forgot Username?</Text>
+          <Pressable onPress={() => router.push("/newUserScreen")}>
+            <Text style={styles.link}>New User?</Text>
+          </Pressable>
+        </View>
       </View>
-    );
+    </View>
+  );
 }
 
 const styles = StyleSheet.create({
@@ -94,10 +98,6 @@ const styles = StyleSheet.create({
     borderColor: '#CBD5E0',
     borderWidth: 1,
     borderRadius: 8,
-    // focus: {
-    //   borderColor: '#9F7AEA',
-    //   borderWidth: 2,
-    // },
   },
   button: {
     width: '100%',
