@@ -9,6 +9,7 @@
     "web": "expo start --web"
   },
   "dependencies": {
+    "@react-native-community/slider": "^4.5.6",
     "@supabase/supabase-js": "^2.49.1",
     "base64-arraybuffer": "^1.0.2",
     "expo": "~52.0.38",
