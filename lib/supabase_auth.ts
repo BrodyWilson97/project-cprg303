@@ -13,6 +13,7 @@ export async function signUp(email: string, password: string) {
     } else {
       console.log("User signed up:", data.user);
     }
+    return error;
   }
   
   
@@ -28,6 +29,8 @@ export async function signUp(email: string, password: string) {
     } else {
       console.log("User signed in:", data.user);
     }
+
+    return error;
   }
   
   

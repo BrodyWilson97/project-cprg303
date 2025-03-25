@@ -4,12 +4,13 @@ import { useEffect } from 'react';
 import { listFiles, streamFile} from "../lib/supabase_crud";
 import * as DocumentPicker from 'expo-document-picker';
 import { decode } from 'base64-arraybuffer'
+import { useRouter } from "expo-router";
 
 
 export default function HomeScreen() {
   //i think copilot wrote this?
   const [isPlaying, setIsPlaying] = useState(false);
-
+  const router = useRouter();
   const handlePlayPause = () => {
     setIsPlaying(!isPlaying);
   };
@@ -19,12 +20,17 @@ export default function HomeScreen() {
   
     useEffect(() => {
       const getData = async () => {
+        //testing
         const data = await streamFile("musicfiles", "user", "sample-3s.mp3");
   
         console.log(data);
       };
       getData();
     }, []);
+
+  function openPlaybackPage(): void {
+    router.push("/playbackPage");
+  }
 
   return (
     <View style={styles.container}>
@@ -48,10 +54,10 @@ export default function HomeScreen() {
           <Text style={styles.tabIcon}>📂</Text>
           <Text style={styles.tabLabel}>Playlist</Text>
         </View>
-        <View style={styles.tabItem}>
-          <Text style={styles.tabIcon}>⚙️</Text>
-          <Text style={styles.tabLabel}>Settings</Text>
-        </View>
+        <TouchableOpacity style={styles.tabItem} onPress={() => router.push("/settingsPage")}>
+            <Text style={styles.tabIcon}>⚙️</Text>
+            <Text style={styles.tabLabel}>Settings</Text>
+        </TouchableOpacity>
       </View>
 
       {/* Recently Played Section */}
@@ -70,20 +76,20 @@ export default function HomeScreen() {
       </View>
 
       {/* Now Playing Section */}
-      <View style={styles.nowPlaying}>
-        <Text style={styles.nowPlayingText}>Now Playing</Text>
-        <View style={styles.controls}>
-          <TouchableOpacity>
-            <Text style={styles.controlIcon}>⏪</Text>
-          </TouchableOpacity>
-          <TouchableOpacity onPress={handlePlayPause}>
-            <Text style={styles.controlIcon}>{isPlaying ? '⏸️' : '▶️'}</Text>
-          </TouchableOpacity>
-          <TouchableOpacity>
-            <Text style={styles.controlIcon}>⏩</Text>
-          </TouchableOpacity>
-        </View>
-      </View>
+      <TouchableOpacity style={styles.nowPlaying} onPress={openPlaybackPage}>
+          <Text style={styles.nowPlayingText}>Now Playing</Text>
+          <View style={styles.controls}>
+            <TouchableOpacity>
+              <Text style={styles.controlIcon}>⏪</Text>
+            </TouchableOpacity>
+            <TouchableOpacity onPress={handlePlayPause}>
+              <Text style={styles.controlIcon}>{isPlaying ? '⏸️' : '▶️'}</Text>
+            </TouchableOpacity>
+            <TouchableOpacity>
+              <Text style={styles.controlIcon}>⏩</Text>
+            </TouchableOpacity>
+          </View>
+      </TouchableOpacity>
     </View>
   );
 }
