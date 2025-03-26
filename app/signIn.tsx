@@ -1,9 +1,12 @@
 import React from "react";
 import { View, Text, TextInput, TouchableOpacity, StyleSheet } from "react-native";
 import Checkbox from 'expo-checkbox';
+import { AudioPlayerProvider } from "../context/audio-player-context";
 
 export default function App() {
     return (
+      <AudioPlayerProvider>
+
       <View style={styles.container}>
         <Text style={styles.title}>Harmoniq</Text>
         <View style={styles.form}>
@@ -42,7 +45,9 @@ export default function App() {
             <Text style={styles.link}>New User?</Text>
           </View>
         </View>
-      </View>
+      </View>  
+          
+      </AudioPlayerProvider>
     );
 }
 

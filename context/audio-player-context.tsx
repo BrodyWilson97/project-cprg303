@@ -7,9 +7,7 @@ import {
     SetStateAction,
     useEffect,
   } from 'react';
-import { tracksPromise } from '../lib/testTracks';
-
-
+import { tracks } from '../lib/testTracks';
 
 export interface Track {
     title: string;
@@ -27,23 +25,26 @@ const AudioPlayerContext = createContext<
     AudioPlayerContextType | undefined
 >(undefined);
 
-// export const AudioPlayerProvider = ({
-//     children,
-//     }: {
-//     children: ReactNode;
-//     }) =>{
-//     const [currentTrack,setCurrentTrack] = useState<Track>(tracks[0]);
-//     const contextValue= {
-//         currentTrack,
-//         setCurrentTrack,
-//     };
+export const AudioPlayerProvider = ({
+    children,
+    }: {
+    children: ReactNode;
+    }) =>{
+    const [currentTrack,setCurrentTrack] = useState<Track>(tracks[0]);
+    // audioRef is used with HTML's <audio> tag to expose it's Play() and Pause() methods... won't work in expo
+    // const audioRef = useRef<HTMLAudioElement>(null);
+    const contextValue= {
+        currentTrack,
+        setCurrentTrack,
+        // audioRef,
+    };
 
-//     return (
-//         <AudioPlayerContext.Provider value={contextValue}>
-//         {children}
-//         </AudioPlayerContext.Provider>
-//     );
-// };
+    return (
+        <AudioPlayerContext.Provider value={contextValue}>
+            {children}
+        </AudioPlayerContext.Provider>
+    );
+};
 
 export const useAudioPlayerContext = (): AudioPlayerContextType => {
 
