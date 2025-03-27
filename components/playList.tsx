@@ -1,13 +1,29 @@
-import { useAudioPlayerContext } from "../context/audio-player-context";
+import React from 'react';
+import { FlatList, TouchableOpacity, Text } from 'react-native';
+import { usePlayerContext } from '../context/audio-player-context';
 
-// Code for the playList component
-export function PlayList() {
+const Playlist = () => {
+  const { 
+    playlist,
+    playTrack, 
+    currentTrack 
+  } = usePlayerContext();
 
-    // We should avoid placing all state data in a global context because every component that consumes the context data will update and re-render unnecessarily.
-    // const { currentTrack, setCurrentTrack} = useAudioPlayerContext();
-    const { currentTrack} = useAudioPlayerContext();
-
-    return (
-        null
-    );
+  return (
+    <FlatList
+      data={playlist}
+      keyExtractor={(item) => item.id.toString()}
+      renderItem={({ item }) => (
+        <TouchableOpacity 
+          onPress={() => playTrack(item)}
+          style={{ 
+            backgroundColor: item.id === currentTrack?.id ? '#ddd' : 'transparent' 
+          }}
+        >
+          <Text>{item.title}</Text>
+          <Text>{item.artist}</Text>
+        </TouchableOpacity>
+      )}
+    />
+  );
 };

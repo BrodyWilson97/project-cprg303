@@ -36,18 +36,21 @@ import { Asset } from 'expo-asset';
 
 export const tracks = [
     {
+        id: 1,
         title: 'Test Track',
         src: '../assets/sample-3s.mp3',
         author: 'Test Author',
         thumbnail: 'https://via.placeholder.com/150',
     },
     {
+        id: 2,
         title: 'Its a Beautiful Day',
         src: '../assets/testFiles/a_beautiful_day.mp3',
         author: 'Trinix ft Rushawn',
         thumbnail: 'https://via.placeholder.com/150',
     },
     {
+        id: 3,
         title: 'We Are the World',
         src: '../assets/testFiles/We_Are_The_World.mp3',
         author: 'Michael Jackson',

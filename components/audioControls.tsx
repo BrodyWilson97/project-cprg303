@@ -1,88 +1,52 @@
-import React, { useState } from "react";
-// filler icons
-import {
-    BsFillFastForwardFill,
-    BsFillPauseFill,
-    BsFillPlayFill,
-    BsFillRewindFill,
-    BsSkipEndFill,
-    BsSkipStartFill,
-    BsShuffle,
-    BsRepeat,
-  } from 'react-icons/bs';
-import { Audio } from 'expo-av';
-import { useAudioPlayerContext } from "../context/audio-player-context";
+import React from 'react';
+import { View, Text, TouchableOpacity } from 'react-native';
+import { Track, usePlayerContext } from '../context/audio-player-context';
+import { Asset } from 'expo-asset';
 
+ export const AudioPlayerControls = () => {
+  const {
+    isPlaying,
+    currentTrack,
+    togglePlayPause,
+    playNextTrack,
+    playPreviousTrack,
+    playTrack,
+  } = usePlayerContext();
 
+  const testTrack: Track = {
+    id: 1,
+    title: 'We Are the World',
+    uri: Asset.fromModule(require('../assets/testFiles/We_Are_The_World.mp3')).uri,
+    artist: 'Michael Jackson',
+    thumbnail: 'https://via.placeholder.com/150',
+  };
 
-export const AudioControls = () => {
+  const handleOnPlay = async () => {
+    playTrack(testTrack);
+  };
+  
 
-    // We should avoid placing all state data in a global context because every component that consumes the context data will update and re-render unnecessarily.
-    // const { currentTrack, setCurrentTrack} = useAudioPlayerContext();
-    const { currentTrack } = useAudioPlayerContext(); // currentTrack is Track Object
-    const [isShuffle, setIsShuffle] = useState<boolean>(false);
-    const [isRepeat, setIsRepeat] = useState<boolean>(false);
-    const [isPlaying, setIsPlaying] = useState<boolean>(false);
+  return (
+    <View>
+      <Text>{currentTrack?.title || 'No track selected'}</Text>
+      <View style={{ flexDirection: 'row' }}>
 
+        <TouchableOpacity onPress={handleOnPlay}>
+          <Text>TEST AUDIO</Text>
+        </TouchableOpacity>
 
-    //cannot use <audio> tag in expo, needs changing
-    return (
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+        <TouchableOpacity onPress={playPreviousTrack}>
+          <Text>⏮</Text>
+        </TouchableOpacity>
         
-        <div className="flex gap-4 items-center">
-            <audio src={currentTrack.src} />
-            <button onClick={() => {}}>
-                <BsSkipStartFill size={20} />
-            </button>
-            <button onClick={() => {}}>
-                <BsFillRewindFill size={20} />
-            </button>
-            <button onClick={() => setIsPlaying((prev) => !prev)}>
-                {isPlaying ? (
-                <BsFillPauseFill size={30} />
-                ) : (
-                <BsFillPlayFill size={30} />
-                )}
-            </button>
-            <button onClick={() => {}}>
-                <BsFillFastForwardFill size={20} />
-            </button>
-            <button onClick={() => {}}>
-                <BsSkipEndFill size={20} />
-            </button>
-            <button onClick={() => setIsShuffle((prev) => !prev)}>
-                <BsShuffle
-                size={20}
-                className={isShuffle ?'text-[#f50]' : ''}
-                />
-            </button>
-            <button onClick={() => setIsRepeat((prev) => !prev)}>
-                <BsRepeat
-                size={20}
-                className={isRepeat ? 'text-[#f50]' : ''}
-                />
-            </button>
-        </div>
-    );
+        <TouchableOpacity onPress={togglePlayPause}>
+          <Text>{isPlaying ? '⏸' : '▶️'}</Text>
+        </TouchableOpacity>
+        
+        <TouchableOpacity onPress={playNextTrack}>
+          <Text>⏭</Text>
+        </TouchableOpacity>
+      </View>
+    </View>
+  );
 };
