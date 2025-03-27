@@ -5,6 +5,7 @@ import { signIn, signOut } from "../lib/supabase_auth";
 import { useEffect, useState } from "react";
 import { useRouter } from "expo-router";
 import { AudioPlayerProvider } from "../context/audio-player-context";
+import { AudioPlayerControls } from "../components/audioControls";
 
 export default function App() {
   const [email, setEmail] = useState<string>("");
@@ -44,6 +45,9 @@ export default function App() {
             style={styles.input}
             onChangeText={setPassword}
           />
+
+<AudioPlayerControls/>
+
         </View>
         <TouchableOpacity style={styles.button} onPress={handleSignIn}>
           <Text style={styles.buttonText}>Log In</Text>
