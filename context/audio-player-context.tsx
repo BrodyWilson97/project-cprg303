@@ -43,7 +43,7 @@ interface PlayerContextType {
 const PlayerContext = createContext<PlayerContextType | undefined>(undefined);
 
 // ======================== Provider Implementation ========================
-export const PlayerProvider = ({ children }: { children: ReactNode }) => {
+export const AudioPlayerProvider = ({ children }: { children: ReactNode }) => {
     const [sound, setSound] = useState<Audio.Sound | null>(null);
     const [isPlaying, setIsPlaying] = useState(false);
     const [currentTrack, setCurrentTrack] = useState<Track | null>(null);
@@ -157,7 +157,7 @@ export const PlayerProvider = ({ children }: { children: ReactNode }) => {
 };
 
 // ======================== Custom Hook ========================
-export const usePlayerContext = (): PlayerContextType => {
+export const useAudioPlayerContext = (): PlayerContextType => {
     const context = useContext(PlayerContext);
     if (context === undefined) {
         throw new Error('usePlayer must be used within a PlayerProvider');

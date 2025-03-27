@@ -1,13 +1,13 @@
 import React from 'react';
 import { FlatList, TouchableOpacity, Text } from 'react-native';
-import { usePlayerContext } from '../context/audio-player-context';
+import { useAudioPlayerContext } from '../context/audio-player-context';
 
 const Playlist = () => {
   const { 
     playlist,
     playTrack, 
     currentTrack 
-  } = usePlayerContext();
+  } = useAudioPlayerContext();
 
   return (
     <FlatList

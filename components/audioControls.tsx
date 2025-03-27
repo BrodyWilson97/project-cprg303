@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, Text, TouchableOpacity } from 'react-native';
-import { Track, usePlayerContext } from '../context/audio-player-context';
+import { Track, useAudioPlayerContext } from '../context/audio-player-context';
 import { Asset } from 'expo-asset';
 
  export const AudioPlayerControls = () => {
@@ -11,7 +11,7 @@ import { Asset } from 'expo-asset';
     playNextTrack,
     playPreviousTrack,
     playTrack,
-  } = usePlayerContext();
+  } = useAudioPlayerContext();
 
   const testTrack: Track = {
     id: 1,
