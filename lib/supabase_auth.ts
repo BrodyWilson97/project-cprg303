@@ -1,5 +1,11 @@
 import supabase from "./db";
 
+// get current user logged in, may need to change to getSession() in the future, or expand to middleware?
+export async function getUser () {
+  const { data } = await supabase.auth.getUser()
+  return data;
+  }
+
 
 // sign up
 export async function signUp(email: string, password: string) {
