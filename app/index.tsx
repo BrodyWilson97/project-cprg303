@@ -26,7 +26,7 @@ export default function App() {
   return (
       <View style={styles.container}>
 
-        {/* CONTROLS FOR TESTING */}
+        {/* Controls for testing */}
         <View style={styles.container}>
           <AudioPlayerControls/>
           <Playlist/>

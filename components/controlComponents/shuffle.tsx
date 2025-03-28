@@ -10,7 +10,7 @@ export const Shuffle = () => {
     } = useAudioPlayerContext();
     
         const handleOnClick = () => {
-            shuffle;
+            shuffle();
         };
     
     return (

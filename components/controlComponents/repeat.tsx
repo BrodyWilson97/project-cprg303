@@ -10,7 +10,7 @@ export const Repeat = () => {
     } = useAudioPlayerContext();
     
         const handleOnClick = () => {
-            repeat;
+            repeat();
         };
     
     return (

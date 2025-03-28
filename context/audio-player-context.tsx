@@ -31,6 +31,8 @@ interface AudioPlayerContextType {
     playlist: Track[];
     isRepeat: boolean;
     isShuffle: boolean;
+    isSeeking: boolean;
+    sliderValue: number;
     
     // Controls
     playTrack: (track: Track) => Promise<void>;
@@ -40,6 +42,8 @@ interface AudioPlayerContextType {
     seekToPosition: (position: number) => Promise<void>;
     repeat: () => void,
     shuffle: () => void,
+    handleSlidingComplete: (value: number) => Promise<void>;
+    handleSliderValueChange: (value: number) => Promise<void>;
     
     // Playlist management
     setPlaylist: Dispatch<SetStateAction<Track[]>>;
@@ -57,6 +61,8 @@ export const AudioPlayerProvider = ({ children }: { children: ReactNode }) => {
     const [position, setPosition] = useState(0);
     const [isRepeat, setIsRepeat] = useState(false);
     const [isShuffle, setIsShuffle] = useState(false);
+    const [isSeeking, setIsSeeking] = useState(false);
+    const [sliderValue, setSliderValue] = useState(0);
     // testTracks hard coded for testing
     const [playlist, setPlaylist] = useState<Track[]>(testTracks);
 
@@ -99,9 +105,10 @@ export const AudioPlayerProvider = ({ children }: { children: ReactNode }) => {
 
     // Handle playback updates (progress, completion)
     const onPlaybackStatusUpdate = (status:  AVPlaybackStatusSuccess | AVPlaybackStatusError) => {
-        if (status.isLoaded) {
+        if (status.isLoaded && !isSeeking) {
             setPosition(status.positionMillis);
             setDuration(status.durationMillis || 0);
+            setSliderValue(status.positionMillis);
     
             // Auto-play next track when current finishes
             if (status.didJustFinish && playlist.length > 0) {
@@ -116,6 +123,12 @@ export const AudioPlayerProvider = ({ children }: { children: ReactNode }) => {
         
         if (isShuffle) {
             const randomIndex = Math.floor(Math.random() * playlist.length);
+            // Make sure the next track is different from the current one
+            if (playlist[randomIndex].id === currentTrack.id) {
+                const nextIndex = (randomIndex + 1) % playlist.length;
+                await playTrack(playlist[nextIndex]);
+                return;
+            }
             await playTrack(playlist[randomIndex]);
             return;
         }
@@ -124,6 +137,7 @@ export const AudioPlayerProvider = ({ children }: { children: ReactNode }) => {
             await playTrack(currentTrack);
             return;
         }
+
         const currentIndex = playlist.findIndex(t => t.id === currentTrack.id);
         const nextIndex = (currentIndex + 1) % playlist.length;
         await playTrack(playlist[nextIndex]);
@@ -149,21 +163,31 @@ export const AudioPlayerProvider = ({ children }: { children: ReactNode }) => {
         if (!sound) return;
         await sound.setPositionAsync(position);
     };
+
+    const handleSliderValueChange = async (value: number) => {
+        if (!sound) { return };
+        setSliderValue(value);
+        setIsSeeking(true);
+    };
+    
+    const handleSlidingComplete = async (value: number) => {
+        if (!sound) return;
+        await sound.setPositionAsync(value);
+        setPosition(value);
+        setIsSeeking(false);
+    };
+
     
     const repeat = () => {
         setIsRepeat(!isRepeat);
         console.log(isRepeat);
-        if (isRepeat) {
-            setIsShuffle(false);
-        }
+        setIsShuffle(false);
     };
 
     const shuffle = () => {
         setIsShuffle(!isShuffle);
         console.log(isShuffle);
-        if (isShuffle) {
-            setIsRepeat(false);
-        }
+        setIsRepeat(false);
     };
 
     // Cleanup on unmount
@@ -184,6 +208,8 @@ export const AudioPlayerProvider = ({ children }: { children: ReactNode }) => {
         playlist,
         isRepeat,
         isShuffle,
+        isSeeking,
+        sliderValue,
         playTrack,
         togglePlayPause,
         playNextTrack,
@@ -192,6 +218,8 @@ export const AudioPlayerProvider = ({ children }: { children: ReactNode }) => {
         setPlaylist,
         repeat,
         shuffle,
+        handleSlidingComplete,
+        handleSliderValueChange,    
     };
 
     return (

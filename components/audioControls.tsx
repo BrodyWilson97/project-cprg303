@@ -7,6 +7,7 @@ import { TogglePlayPause } from './controlComponents/togglePlayPause';
 import { testTracks } from '../lib/testTracks';
 import { Shuffle } from './controlComponents/shuffle';
 import { Repeat } from './controlComponents/repeat';
+import { ProgressBar } from './controlComponents/progressBar';
 
  export const AudioPlayerControls = () => {
   const {
@@ -40,6 +41,8 @@ import { Repeat } from './controlComponents/repeat';
             <Repeat/>
 
         </View>
+        
+        <ProgressBar/>
       </View>
   );
 };
