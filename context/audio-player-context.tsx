@@ -1,15 +1,17 @@
-import React, { createContext, useContext, useState, useEffect, ReactNode, Dispatch, SetStateAction } from 'react';
-import { Audio, AVPlaybackStatusError, AVPlaybackStatusSuccess } from 'expo-av';
-// import { tracks } from '../lib/testTracks';
-
-// TEST TRACKS
-const testTrack = {
-    id: 1,
-    title: 'We Are the World',
-    uri: require('../assets/testFiles/We_Are_The_World.mp3'),
-    author: 'Michael Jackson',
-    thumbnail: 'https://via.placeholder.com/150',
-  };
+import React, { 
+    createContext, 
+    useContext, 
+    useState, 
+    useEffect, 
+    ReactNode, 
+    Dispatch, 
+    SetStateAction 
+} from 'react';
+import { Audio, 
+    AVPlaybackStatusError, 
+    AVPlaybackStatusSuccess 
+} from 'expo-av';
+import { testTracks } from '../lib/testTracks';
 
 // ======================== Type Definitions ========================
 export interface Track {
@@ -20,13 +22,15 @@ export interface Track {
     thumbnail?: string;   // Optional cover art
 }
 
-interface PlayerContextType {
+interface AudioPlayerContextType {
     // State
     currentTrack: Track | null;
     isPlaying: boolean;
     duration: number;     // in milliseconds
     position: number;     // in milliseconds
     playlist: Track[];
+    isRepeat: boolean;
+    isShuffle: boolean;
     
     // Controls
     playTrack: (track: Track) => Promise<void>;
@@ -34,13 +38,15 @@ interface PlayerContextType {
     playNextTrack: () => Promise<void>;
     playPreviousTrack: () => Promise<void>;
     seekToPosition: (position: number) => Promise<void>;
+    repeat: () => void,
+    shuffle: () => void,
     
     // Playlist management
     setPlaylist: Dispatch<SetStateAction<Track[]>>;
 }
 
 // ======================== Context Setup ========================
-const PlayerContext = createContext<PlayerContextType | undefined>(undefined);
+const AudioPlayerContext = createContext<AudioPlayerContextType | undefined>(undefined);
 
 // ======================== Provider Implementation ========================
 export const AudioPlayerProvider = ({ children }: { children: ReactNode }) => {
@@ -49,7 +55,10 @@ export const AudioPlayerProvider = ({ children }: { children: ReactNode }) => {
     const [currentTrack, setCurrentTrack] = useState<Track | null>(null);
     const [duration, setDuration] = useState(0);
     const [position, setPosition] = useState(0);
-    const [playlist, setPlaylist] = useState<Track[]>([]);
+    const [isRepeat, setIsRepeat] = useState(false);
+    const [isShuffle, setIsShuffle] = useState(false);
+    // testTracks hard coded for testing
+    const [playlist, setPlaylist] = useState<Track[]>(testTracks);
 
     // Load and play a track
     const playTrack = async (track: Track) => {
@@ -91,13 +100,13 @@ export const AudioPlayerProvider = ({ children }: { children: ReactNode }) => {
     // Handle playback updates (progress, completion)
     const onPlaybackStatusUpdate = (status:  AVPlaybackStatusSuccess | AVPlaybackStatusError) => {
         if (status.isLoaded) {
-        setPosition(status.positionMillis);
-        setDuration(status.durationMillis || 0);
-        
-        // Auto-play next track when current finishes
-        if (status.didJustFinish && playlist.length > 0) {
-            playNextTrack();
-        }
+            setPosition(status.positionMillis);
+            setDuration(status.durationMillis || 0);
+    
+            // Auto-play next track when current finishes
+            if (status.didJustFinish && playlist.length > 0) {
+                playNextTrack();
+            }
         }
     };
 
@@ -105,6 +114,16 @@ export const AudioPlayerProvider = ({ children }: { children: ReactNode }) => {
     const playNextTrack = async () => {
         if (!currentTrack || !playlist.length) return;
         
+        if (isShuffle) {
+            const randomIndex = Math.floor(Math.random() * playlist.length);
+            await playTrack(playlist[randomIndex]);
+            return;
+        }
+
+        if (isRepeat) {
+            await playTrack(currentTrack);
+            return;
+        }
         const currentIndex = playlist.findIndex(t => t.id === currentTrack.id);
         const nextIndex = (currentIndex + 1) % playlist.length;
         await playTrack(playlist[nextIndex]);
@@ -114,6 +133,12 @@ export const AudioPlayerProvider = ({ children }: { children: ReactNode }) => {
     const playPreviousTrack = async () => {
         if (!currentTrack || !playlist.length) return;
         
+        if (isShuffle) {
+            const randomIndex = Math.floor(Math.random() * playlist.length);
+            await playTrack(playlist[randomIndex]);
+            return;
+        }
+
         const currentIndex = playlist.findIndex(t => t.id === currentTrack.id);
         const prevIndex = (currentIndex - 1 + playlist.length) % playlist.length;
         await playTrack(playlist[prevIndex]);
@@ -123,6 +148,22 @@ export const AudioPlayerProvider = ({ children }: { children: ReactNode }) => {
     const seekToPosition = async (position: number) => {
         if (!sound) return;
         await sound.setPositionAsync(position);
+    };
+    
+    const repeat = () => {
+        setIsRepeat(!isRepeat);
+        console.log(isRepeat);
+        if (isRepeat) {
+            setIsShuffle(false);
+        }
+    };
+
+    const shuffle = () => {
+        setIsShuffle(!isShuffle);
+        console.log(isShuffle);
+        if (isShuffle) {
+            setIsRepeat(false);
+        }
     };
 
     // Cleanup on unmount
@@ -135,32 +176,36 @@ export const AudioPlayerProvider = ({ children }: { children: ReactNode }) => {
     }, [sound]);
 
     // Context value
-    const contextValue: PlayerContextType = {
+    const contextValue: AudioPlayerContextType = {
         currentTrack,
         isPlaying,
         duration,
         position,
         playlist,
+        isRepeat,
+        isShuffle,
         playTrack,
         togglePlayPause,
         playNextTrack,
         playPreviousTrack,
         seekToPosition,
         setPlaylist,
+        repeat,
+        shuffle,
     };
 
     return (
-        <PlayerContext.Provider value={contextValue}>
+        <AudioPlayerContext.Provider value={contextValue}>
             {children}
-        </PlayerContext.Provider>
+        </AudioPlayerContext.Provider>
     );
 };
 
 // ======================== Custom Hook ========================
-export const useAudioPlayerContext = (): PlayerContextType => {
-    const context = useContext(PlayerContext);
+export const useAudioPlayerContext = (): AudioPlayerContextType => {
+    const context = useContext(AudioPlayerContext);
     if (context === undefined) {
-        throw new Error('usePlayer must be used within a PlayerProvider');
+        throw new Error('usePlayer must be used within an AudioPlayerProvider');
     }
     return context;
 };

@@ -1,52 +1,45 @@
 import React from 'react';
 import { View, Text, TouchableOpacity } from 'react-native';
-import { Track, useAudioPlayerContext } from '../context/audio-player-context';
-import { Asset } from 'expo-asset';
+import { useAudioPlayerContext } from '../context/audio-player-context';
+import { NextTrack } from './controlComponents/nextTrack';
+import { PrevTrack } from './controlComponents/prevTrack';
+import { TogglePlayPause } from './controlComponents/togglePlayPause';
+import { testTracks } from '../lib/testTracks';
+import { Shuffle } from './controlComponents/shuffle';
+import { Repeat } from './controlComponents/repeat';
 
  export const AudioPlayerControls = () => {
   const {
-    isPlaying,
-    currentTrack,
-    togglePlayPause,
-    playNextTrack,
-    playPreviousTrack,
-    playTrack,
+      currentTrack,
+      playTrack,
   } = useAudioPlayerContext();
 
-  const testTrack: Track = {
-    id: 1,
-    title: 'We Are the World',
-    uri: Asset.fromModule(require('../assets/testFiles/We_Are_The_World.mp3')).uri,
-    artist: 'Michael Jackson',
-    thumbnail: 'https://via.placeholder.com/150',
-  };
-
+  // Hard coded Testing code
   const handleOnPlay = async () => {
-    playTrack(testTrack);
+      playTrack(testTracks[0]);
   };
-  
+  // End testing code
 
   return (
-    <View>
-      <Text>{currentTrack?.title || 'No track selected'}</Text>
-      <View style={{ flexDirection: 'row' }}>
+      <View>
+        <Text>{currentTrack?.title || 'No track selected'}</Text>
+          <View style={{ flexDirection: 'row' }}>
 
-        <TouchableOpacity onPress={handleOnPlay}>
-          <Text>TEST AUDIO</Text>
-        </TouchableOpacity>
+            <TouchableOpacity onPress={handleOnPlay}>
+              <Text>TEST AUDIO</Text>
+            </TouchableOpacity>
 
-        <TouchableOpacity onPress={playPreviousTrack}>
-          <Text>⏮</Text>
-        </TouchableOpacity>
-        
-        <TouchableOpacity onPress={togglePlayPause}>
-          <Text>{isPlaying ? '⏸' : '▶️'}</Text>
-        </TouchableOpacity>
-        
-        <TouchableOpacity onPress={playNextTrack}>
-          <Text>⏭</Text>
-        </TouchableOpacity>
+            <PrevTrack/>
+
+            <TogglePlayPause/>
+
+            <NextTrack/>
+
+            <Shuffle/>
+
+            <Repeat/>
+
+        </View>
       </View>
-    </View>
   );
 };

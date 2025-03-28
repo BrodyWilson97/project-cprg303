@@ -6,6 +6,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "expo-router";
 import { AudioPlayerProvider } from "../context/audio-player-context";
 import { AudioPlayerControls } from "../components/audioControls";
+import { Playlist } from "../components/playList";
 
 export default function App() {
   const [email, setEmail] = useState<string>("");
@@ -23,54 +24,56 @@ export default function App() {
   };
 
   return (
-    <AudioPlayerProvider>
-    <View style={styles.container}>
-      <Text style={styles.title}>Harmoniq</Text>
-      <View style={styles.form}>
-        <View style={styles.inputGroup}>
-          <Text style={styles.label}>Email</Text>
-          <TextInput
-            id="email"
-            placeholder="Enter your email"
-            style={styles.input}
-            onChangeText={setEmail}
-          />
-        </View>
-        <View style={styles.inputGroup}>
-          <Text style={styles.label}>Password</Text>
-          <TextInput
-            id="password"
-            placeholder="Enter your password"
-            secureTextEntry
-            style={styles.input}
-            onChangeText={setPassword}
-          />
+      <View style={styles.container}>
 
-<AudioPlayerControls/>
+        {/* CONTROLS FOR TESTING */}
+        <View style={styles.container}>
+          <AudioPlayerControls/>
+          <Playlist/>
+        </View>
 
-        </View>
-        <TouchableOpacity style={styles.button} onPress={handleSignIn}>
-          <Text style={styles.buttonText}>Log In</Text>
-        </TouchableOpacity>
-        <View style={styles.checkboxGroup}>
-          <View style={styles.checkboxContainer}>
-            <Checkbox />
-            <Text style={styles.checkboxLabel}>Remember Username?</Text>
+        <Text style={styles.title}>Harmoniq</Text>
+        <View style={styles.form}>
+          <View style={styles.inputGroup}>
+            <Text style={styles.label}>Email</Text>
+            <TextInput
+              id="email"
+              placeholder="Enter your email"
+              style={styles.input}
+              onChangeText={setEmail}
+            />
           </View>
-          <View style={styles.checkboxContainer}>
-            <Checkbox />
-            <Text style={styles.checkboxLabel}>Remember Password?</Text>
+          <View style={styles.inputGroup}>
+            <Text style={styles.label}>Password</Text>
+            <TextInput
+              id="password"
+              placeholder="Enter your password"
+              secureTextEntry
+              style={styles.input}
+              onChangeText={setPassword}
+            />
           </View>
-        </View>
-        <View style={styles.links}>
-          <Text style={styles.link}>Forgot Username?</Text>
-          <Pressable onPress={() => router.push("/newUserScreen")}>
-            <Text style={styles.link}>New User?</Text>
-          </Pressable>
+          <TouchableOpacity style={styles.button} onPress={handleSignIn}>
+            <Text style={styles.buttonText}>Log In</Text>
+          </TouchableOpacity>
+          <View style={styles.checkboxGroup}>
+            <View style={styles.checkboxContainer}>
+              <Checkbox />
+              <Text style={styles.checkboxLabel}>Remember Username?</Text>
+            </View>
+            <View style={styles.checkboxContainer}>
+              <Checkbox />
+              <Text style={styles.checkboxLabel}>Remember Password?</Text>
+            </View>
+          </View>
+          <View style={styles.links}>
+            <Text style={styles.link}>Forgot Username?</Text>
+            <Pressable onPress={() => router.push("/newUserScreen")}>
+              <Text style={styles.link}>New User?</Text>
+            </Pressable>
+          </View>
         </View>
       </View>
-    </View>
-    </AudioPlayerProvider>
   );
 }
 
