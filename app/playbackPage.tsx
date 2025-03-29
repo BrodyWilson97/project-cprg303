@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
-import Slider from '@react-native-community/slider';
+import  Slider  from '@react-native-community/slider';
 
 export default function NowPlayingScreen() {
   const [isPlaying, setIsPlaying] = useState(false);

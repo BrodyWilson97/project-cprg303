@@ -1,5 +1,5 @@
 import React from "react";
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, Pressable } from "react-native";
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, Pressable, Alert } from "react-native";
 import Checkbox from 'expo-checkbox';
 import { signIn, signOut } from "../lib/supabase_auth";
 import { useEffect, useState } from "react";
@@ -17,10 +17,12 @@ export default function App() {
 
   const handleSignIn = async () => {
     setLoading(true);
-    signIn(email, password);
+    const error  = await signIn(email, password);
 
-    setLoading(false);
-    router.push("/homePage");
+    if (!error) {
+      setLoading(false);
+      router.push("/homePage");
+    }
   };
 
   return (

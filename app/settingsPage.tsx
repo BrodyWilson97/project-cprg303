@@ -1,29 +1,81 @@
-import { Home } from 'lucide-react';
-
+import React from 'react';
+import { signOut } from "../lib/supabase_auth";
+import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import AntDesign from '@expo/vector-icons/AntDesign';
+import { router } from 'expo-router';
 export default function SettingsPage() {
   const menuItems = ["Account", "Content and Display", "Privacy", "Storage", "Notifications", "About"];
 
+  function handleLogOut(): void {
+    signOut();
+    router.push("/");
+  }
+
   return (
-    <div className="min-h-screen bg-purple-200 p-6">
-      <header className="flex justify-between items-center mb-8">
-        <span className="text-lg font-medium">9:30</span>
-        <Home size={32} />
-      </header>
+    <View style={styles.container}>
+      <View style={styles.header}>
+        <AntDesign name="home" size={24} color="black" />
+      </View>
 
-      <div className="space-y-6">
+      <View style={styles.menu}>
         {menuItems.map((item, index) => (
-          <div key={index} className="border-b border-gray-300 pb-4">
-            <div className="flex justify-between items-center">
-              <span className="text-lg">{item}</span>
-              <span>&#9654;</span>
-            </div>
-          </div>
+          <View key={index} style={styles.menuItem}>
+            <View style={styles.menuItemContent}>
+              <Text style={styles.menuItemText}>{item}</Text>
+              <Text style={styles.menuItemArrow}>&#9654;</Text>
+            </View>
+          </View>
         ))}
-      </div>
+      </View>
 
-      <button className="mt-10 w-full bg-purple-600 text-white py-3 rounded-2xl">
-        Log Out
-      </button>
-    </div>
+      <TouchableOpacity style={styles.logoutButton} onPress={handleLogOut}>
+        <Text style={styles.logoutButtonText}>Log Out</Text>
+      </TouchableOpacity>
+    </View>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: '#E9D8FD',
+    padding: 24,
+  },
+  header: {
+    flexDirection: 'row',
+    justifyContent: 'flex-end',
+    alignItems: 'center',
+    marginBottom: 24,
+  },
+  menu: {
+    flex: 1,
+    marginBottom: 24,
+  },
+  menuItem: {
+    borderBottomWidth: 1,
+    borderBottomColor: '#CBD5E0',
+    paddingBottom: 16,
+    marginBottom: 16,
+  },
+  menuItemContent: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  menuItemText: {
+    fontSize: 18,
+  },
+  menuItemArrow: {
+    fontSize: 18,
+  },
+  logoutButton: {
+    backgroundColor: '#6B46C1',
+    padding: 16,
+    borderRadius: 24,
+    alignItems: 'center',
+  },
+  logoutButtonText: {
+    color: '#FFF',
+    fontSize: 16,
+  },
+});

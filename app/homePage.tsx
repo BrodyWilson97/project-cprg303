@@ -4,27 +4,37 @@ import { useEffect } from 'react';
 import { listFiles, streamFile} from "../lib/supabase_crud";
 import * as DocumentPicker from 'expo-document-picker';
 import { decode } from 'base64-arraybuffer'
-
+import { useRouter } from "expo-router";
+import { getUser } from "../lib/supabase_auth";
 
 export default function HomeScreen() {
-  //i think copilot wrote this?
-  const [isPlaying, setIsPlaying] = useState(false);
+  // testing to access current user
+  const [user, setUser] = useState<string>("");
+
+  const [isPlaying, setIsPlaying] = useState<boolean>(false);
+  const router = useRouter();
+
+  const fetchUser = async () => {
+    const { user } = await getUser();
+    if (user) {
+      setUser(user.email!);
+    }
+    else if (!user) return;
+  };
+
+  useEffect(() => {
+    fetchUser();
+
+  }, []);
 
   const handlePlayPause = () => {
     setIsPlaying(!isPlaying);
   };
 
-    //for testing supabase stuff
-    const [file, setFile] = useState<string>("");
-  
-    useEffect(() => {
-      const getData = async () => {
-        const data = await streamFile("musicfiles", "user", "sample-3s.mp3");
-  
-        console.log(data);
-      };
-      getData();
-    }, []);
+
+  function openPlaybackPage(): void {
+    router.push("/playbackPage");
+  }
 
   return (
     <View style={styles.container}>
@@ -48,15 +58,15 @@ export default function HomeScreen() {
           <Text style={styles.tabIcon}>📂</Text>
           <Text style={styles.tabLabel}>Playlist</Text>
         </View>
-        <View style={styles.tabItem}>
-          <Text style={styles.tabIcon}>⚙️</Text>
-          <Text style={styles.tabLabel}>Settings</Text>
-        </View>
+        <TouchableOpacity style={styles.tabItem} onPress={() => router.push("/settingsPage")}>
+            <Text style={styles.tabIcon}>⚙️</Text>
+            <Text style={styles.tabLabel}>Settings</Text>
+        </TouchableOpacity>
       </View>
 
       {/* Recently Played Section */}
       <View style={styles.recentlyPlayed}>
-        <Text style={styles.recentlyPlayedTitle}>Recently Played</Text>
+        <Text style={styles.recentlyPlayedTitle}>{user}</Text>
       </View>
 
       {/* Music Thumbnails */}
@@ -70,20 +80,24 @@ export default function HomeScreen() {
       </View>
 
       {/* Now Playing Section */}
-      <View style={styles.nowPlaying}>
-        <Text style={styles.nowPlayingText}>Now Playing</Text>
-        <View style={styles.controls}>
-          <TouchableOpacity>
-            <Text style={styles.controlIcon}>⏪</Text>
-          </TouchableOpacity>
-          <TouchableOpacity onPress={handlePlayPause}>
-            <Text style={styles.controlIcon}>{isPlaying ? '⏸️' : '▶️'}</Text>
-          </TouchableOpacity>
-          <TouchableOpacity>
-            <Text style={styles.controlIcon}>⏩</Text>
-          </TouchableOpacity>
-        </View>
-      </View>
+      <TouchableOpacity style={styles.nowPlaying} onPress={openPlaybackPage}>
+          <Text style={styles.nowPlayingText}>Now Playing</Text>
+          <View style={styles.controls}>
+            <TouchableOpacity>
+              <Text style={styles.controlIcon}>⏪</Text>
+            </TouchableOpacity>
+            <TouchableOpacity onPress={handlePlayPause}>
+              <Text style={styles.controlIcon}>{isPlaying ? '⏸️' : '▶️'}</Text>
+            </TouchableOpacity>
+            <TouchableOpacity>
+              <Text style={styles.controlIcon}>⏩</Text>
+            </TouchableOpacity>
+          </View>
+      </TouchableOpacity>
+
+      <TouchableOpacity style={styles.button} onPress={() => router.push("/tempFileManagementCRUD")}>
+        <Text >File Management</Text>
+      </TouchableOpacity>
     </View>
   );
 }
@@ -184,4 +198,11 @@ const styles = StyleSheet.create({
     color: '#000',
     fontSize: 24,
   },
+  button: {
+    backgroundColor: '#B794F4',
+    padding: 12,
+    borderRadius: 8,
+    marginTop: 16,
+  }
 });
+

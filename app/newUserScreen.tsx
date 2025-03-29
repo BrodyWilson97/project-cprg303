@@ -12,10 +12,15 @@ export default function NewUser() {
     
     const handleSignUp = async () => {
       setLoading(true);
-      await signUp(email, password);
+      const error = await signUp(email, password);
   
-      setLoading(false);
-      router.push("/homePage");
+      if (error) {
+        console.error("Error signing up:", error.message);
+      }
+      else{
+        setLoading(false);
+        router.push("/homePage");
+      }
     };
 
     return (

@@ -1,10 +1,9 @@
 import supabase from "./db";
+
 export async function getPublicFileUrl(bucketName: string, filePath: string){
     return supabase.storage.from(bucketName).getPublicUrl(filePath).data.publicUrl;
 };
-// // Example usage
-// const fileUrl = getPublicFileUrl('your-bucket', 'uploads/user123/profile.png');
-// console.log('Public File URL:', fileUrl);
+
 export async function listFiles(bucketName: string){
     const { data, error } = await supabase
         .storage
@@ -19,25 +18,20 @@ export async function listFiles(bucketName: string){
     return data;
 };
 
-export async function streamFile(bucketName: string, folderName: string, fileName: string){
+//TODO add error, modularity?? user id as foldername
+export async function streamFile(bucketName: string, userId: string, fileName: string){
+    const filePath = `${userId}/${fileName}`;
+    console.log(filePath);
     const { data } = await supabase
   .storage
   .from(bucketName)
-  .getPublicUrl('${folderName}/${fileName}')
+  .createSignedUrl(filePath, 10000)
   return data;
 }
 
 
-// TODO   //move to filespage??
-//   const handleSelectFile = async () => {
-//     const result = await DocumentPicker.getDocumentAsync({ type: "audio/*" }).then((file) => {
-//       uploadFile("musicfiles", file as any);
-//       console.log(file);
-//     });
-    
-//   }
 
-// export async function uploadFile(bucketName: string, file: File){
+ export async function uploadFile(bucketName: string, file: File){
 //     //const img = file.assets[0];
 
 //     const base64 = await FileSystem.readAsStringAsync(img.uri, { encoding: 'base64' });
@@ -51,4 +45,18 @@ export async function streamFile(bucketName: string, folderName: string, fileNam
 //         return;
 //     }
 //     console.log('File uploaded successfully');
-// }
+ }
+
+export async function deleteFile(bucketName: string, filePath: string){
+    const { error } = await supabase
+        .storage
+        .from(bucketName)
+        .remove([filePath]);
+        
+    if (error) {
+        console.error('Error deleting file:', error);
+        return true;
+    }
+    console.log('File deleted successfully');
+    return false;
+}
