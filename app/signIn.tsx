@@ -1,12 +1,9 @@
 import React from "react";
 import { View, Text, TextInput, TouchableOpacity, StyleSheet } from "react-native";
 import Checkbox from 'expo-checkbox';
-import { AudioPlayerProvider } from "../context/audio-player-context";
 
 export default function App() {
     return (
-      <AudioPlayerProvider>
-
       <View style={styles.container}>
         <Text style={styles.title}>Harmoniq</Text>
         <View style={styles.form}>
@@ -46,11 +43,10 @@ export default function App() {
           </View>
         </View>
       </View>  
-          
-      </AudioPlayerProvider>
     );
 }
 
+// commented out some styles for now, as they were giving me errors for some reason
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -67,10 +63,10 @@ const styles = StyleSheet.create({
   form: {
     width: '100%',
     maxWidth: 400,
-    spaceY: 24,
+    // spaceY: 24,
   },
   inputGroup: {
-    spaceY: 8,
+    // spaceY: 8,
   },
   label: {
     fontSize: 14,
@@ -82,11 +78,11 @@ const styles = StyleSheet.create({
     borderColor: '#CBD5E0',
     borderWidth: 1,
     borderRadius: 8,
-    outline: 'none',
-    focus: {
-      borderColor: '#9F7AEA',
-      borderWidth: 2,
-    },
+    // outline: 'none',
+    // focus: {
+    //   borderColor: '#9F7AEA',
+    //   borderWidth: 2,
+    // },
   },
   button: {
     width: '100%',
