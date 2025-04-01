@@ -2,8 +2,6 @@ import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet } from 'react-native';
 import { useEffect } from 'react';
 import { listFiles, streamFile} from "../lib/supabase_crud";
-import * as DocumentPicker from 'expo-document-picker';
-import { decode } from 'base64-arraybuffer'
 import { useRouter } from "expo-router";
 import { getUser } from "../lib/supabase_auth";
 
@@ -17,7 +15,7 @@ export default function HomeScreen() {
   const fetchUser = async () => {
     const { user } = await getUser();
     if (user) {
-      setUser(user.email!);
+      setUser(user.id);
     }
     else if (!user) return;
   };

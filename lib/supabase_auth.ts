@@ -33,7 +33,7 @@ export async function signUp(email: string, password: string) {
     if (error) {
       console.error("Error signing in:", error.message);
     } else {
-      console.log("User signed in:", data.user);
+      console.log("User signed in:", data.user.id);
     }
 
     return error;
