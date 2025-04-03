@@ -33,26 +33,44 @@ export const FileUploadScreen: React.FC<uploadProps> = ({ userID, addSong }) => 
       quality: 1,
     });
 
-    if (!result.canceled) {
-      setImage(result.assets[0].uri);
-    } else {
-      Alert.alert("Image selection cancelled.");
-    }
+
+    if(result && result.canceled === false) {
+      const base64File = await FileSystem.readAsStringAsync(result.assets[0].uri, {
+       encoding: 'base64'});
+        
+      setImage(base64File);
+
+      }
+
   };
 
 
-  const handleSubmit = () => {
-    if (!image || !audioFile || !name || !artistName) {
-      Alert.alert("Error", "Please fill out all fields and upload both files.");
+  const handleSubmit = async () => {
+    if (!audioFile || !name || !artistName) {
+      Alert.alert("Error", "Please fill out all fields");
       return;
     }
 
-    uploadFile("musicfiles", userID, name, audioFile);
-
-    const song: song = { name, id: userID, artistName: artistName };
+    const id = await uploadFile(userID, name, audioFile, image, artistName);
+    if (!id) {
+      return;
+    }
 
     // Add the file to the parent component's state
-    addSong(song)
+    const song: song = {
+      name: name,
+      id: id,
+      artistName: artistName,
+      songName: name,
+      imageURL: "",
+    };
+    addSong(song);
+
+    // Reset the form
+    setImage(null);
+    setAudioFile(null);
+    setName("");
+    setArtistName("");
   };
 
   return (

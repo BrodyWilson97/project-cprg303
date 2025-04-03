@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from "react";
-import { View, Text, TextInput, TouchableOpacity, FlatList, StyleSheet, Alert } from "react-native";
+import { View, Text, TextInput, TouchableOpacity, FlatList, StyleSheet, Alert, Image } from "react-native";
 import { FileObject } from '@supabase/storage-js';
-import { streamFile, listFiles, uploadFile, deleteFile } from "../lib/supabase_crud";
+import { getFileURL, listFiles, uploadFile, deleteFile } from "../lib/supabase_crud";
 import {getUser} from "../lib/supabase_auth";
 import { useRouter } from "expo-router";
 import {FileUploadScreen} from "./fileUploadScreen";
 import { song } from "../constants/types";
+import { listBucket } from "../lib/supabase_bucket_crud";
+import supabase from "../lib/db";
 
 export default function songManagementPage() {
   const [songs, setSongs] = useState<song[]>([]);
@@ -23,49 +25,58 @@ export default function songManagementPage() {
     if (user) {
       setUserID(user.id);
     }
+
     else if (!user) return;
   };
 
   const fetchsongs = async () => {
-    await fetchUser();
 
     // fetch song in users folder by their id
     if (!userID) return;
-    const data : song[] = await listFiles("musicfiles", userID);
 
-    if(!data) {
-      return;
+    const data = await listFiles(userID);
+
+    // //auto route to upload screen if no songs are found
+    if(data?.length === 0) {
+      setShowUploadModal(true);
     }
-    setSongs([...data, ...songs]);
+
+    if (!data) return;
+
+    setSongs([...data]);
+
   };
 
   useEffect(() => {
     fetchUser();
   }, []);
 
-    useEffect(() => {
-      fetchsongs();
-    }, [userID]);
+  useEffect(() => {
+    fetchsongs();
+
+  }, [userID]);
 
 
-  const addSong = (song: song) => {
+  const addSong = async (song: song) => {
+    //get image url
+    let imgUrl = await getFileURL("imagefiles", userID, song.id, 100000, "image");
+    if (imgUrl?.length === 0) {
+      imgUrl = 'https://community.magicmusic.net/media/unknown-album.294/full?d=1443476842';
+    }
+
+    if (imgUrl){
+      song.imageURL = imgUrl;
+    }
     setSongs([...songs, song]);
   }
 
 
-  const handleDelete = async (songName: string) => {
-    const error = await deleteFile("musicfiles", userID, songName);
-    if (!error) {
+  const handleDelete = async (songId: string) => {
+    const error = await deleteFile(userID, songId);
+
       Alert.alert("Success", "song deleted successfully!");
-      setSongs((prevsongs) => prevsongs.filter((song) => song.name !== songName));
-    } else {
-      Alert.alert("Error", "Failed to delete song.");
-    }
+      setSongs((prevsongs) => prevsongs.filter((song) => song.id !== songId));
   };
-
-
-
-
 
   return (
     <View style={styles.container}>
@@ -100,14 +111,17 @@ export default function songManagementPage() {
               <TouchableOpacity
                 style={styles.songItem}
                 onPress={async () => {
-                  const url = await streamFile("musicfiles", userID, item.name);
+                  const url = await getFileURL("musicfiles", userID, item.id, 10000, "audio");
                   console.log("Streaming URL:", url);
                 }}
               >
-                <Text style={styles.songName}>{item.name}</Text>
+                <Image         
+                      source={{ uri: item.imageURL,}} 
+                      style={{ width: 50, height: 50 }} />
+                <Text style={styles.songName}>{item.songName}</Text>
                 <TouchableOpacity
                   style={styles.deleteButton}
-                  onPress={() => handleDelete(item.name)}
+                  onPress={() => handleDelete(item.id)}
                 >
                   <Text style={styles.deleteButtonText}>Delete</Text>
                 </TouchableOpacity>

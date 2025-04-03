@@ -1,48 +1,75 @@
 import supabase from "./db";
-import { decode, encode } from 'base64-arraybuffer';
+import { song } from "../constants/types";
+import {listBucket, uploadBucket, deleteBucket} from "./supabase_bucket_crud";
+import { get } from "react-native/Libraries/TurboModule/TurboModuleRegistry";
 
-type file = {
-    name: string;
-    id: string;
-};
-//list all files in users folder based on their id
-export async function listFiles(bucketName: string, userId: string){
+//list all files in the music bucket for the users folder and the corresponding image and artist name
+//based on the song id
+//we only need to call the file in the music bucket when we want to stream it
+export async function listFiles(userId: string){
     const filePath = `${userId}`;
 
+    //image files
+    const imgData = await listBucket("imagefiles", filePath);
+
+    //table data
     const { data, error } = await supabase
-        .storage
-        .from(bucketName)
-        .list(filePath, )
-        
+    .from('songData')
+    .select('*')
+    .eq('userId', userId);
+
     if (error) {
-        console.error('Error listing files:', error);
-        return [];
+        console.error('Error fetching song data:', error);
+        return null;
     }
     
-    // Map the data to an array of file objects
-    const files: file[] = data.map((item) => ({
-        name: item.name || 'Unknown',
-        id: item.id,
-    }));
-    
-    return files;
-};
+    // Combine the data into one array based on the `id`
+    const combinedData: song[] = data;
+    data.map(async (songItem) => {
+        //get the image url for the song
+        let imgUrl = await getFileURL("imagefiles", userId, songItem.id, 100000, "image");
+        if (imgUrl?.length === 0) {
+            imgUrl = 'https://community.magicmusic.net/media/unknown-album.294/full?d=1443476842';
+        }
+
+        if (imgUrl){
+            songItem.imageURL = imgUrl;
+        }
+        // const imageUrl = await getFileURL("imagefiles", userId, songItem.id, 100000, "image");
+        //     songItem.imageURL = imageUrl && imageUrl.length>0  ? imageUrl : 'https://community.magicmusic.net/media/unknown-album.294/full?d=1443476842';
+        // })
+    })
+
+        return combinedData ? combinedData : [];
+}
 
 //get temporary signed url for the file to be streamed when user clicks on it from listed file names
-export async function streamFile(bucketName: string, userId: string, fileName: string){
-    const filePath = `${userId}/${fileName}`;
+//or to get the image url for the song
+export async function getFileURL(bucketName: string, userId: string, fileId: string, timeout: number, fileType: string){
+
+    let filePath = `${userId}/${fileId}`;
+    if(fileType === 'audio') {
+        filePath = filePath + ".mp3"; // Add .mp3 extension for audio files
+    }
+    else if(fileType === 'image') {
+        filePath = filePath + ".png"; // Add .png extension for image files
+    }
+    else{
+        console.error('Invalid file type');
+    }
+
+    console.log('file path:', filePath);
     const { data, error } = await supabase
     .storage
     .from(bucketName)
-    .createSignedUrl(filePath, 10000)
+    .createSignedUrl(filePath, timeout)
 
     if (!data) {
-        console.error('Error streaming file:', data);
         return null;
     }
 
     if (error) {
-        console.error('Stream failed:', error);
+        console.error('fetch file url failed:', error);
         } 
 
         console.log(data);
@@ -52,42 +79,62 @@ export async function streamFile(bucketName: string, userId: string, fileName: s
 
 
 
- export async function uploadFile(bucketName: string, userId: string, fileName: string, encodedFile: string) {
+//upload song to music bucket, image to image bucket and artist name/song name to table and song id to all
+ export async function uploadFile(userId: string, songName: string, encodedMusicFile: string, encodedImgFile: string | null, artistName: string){
 
-    const filePath = `${userId}/${fileName}`;
+    //file path for each bucket (each folder is the user id) and each file is given a unique id 
+    //as the file "name" attribute so we can reference it in the image bucket and song data table
 
-    if(encodedFile === null || encodedFile === undefined || encodedFile.length === 0){
-        console.error('Encoded file is empty or null');
+    if(encodedMusicFile === null || encodedMusicFile  === undefined || encodedMusicFile .length === 0){
+        console.error('Encoded music file is empty or null');
         return;
     }
 
-    const { data, error } = await supabase  
-    .storage  
-    .from(bucketName)  
-    .upload(filePath, decode(encodedFile), {  
-        contentType: 'audio/mpeg'  
-    })
+    //insert artist name and song name to table
+    const { data } = await supabase
+    .from('songData')
+    .insert([
+        { artistName: artistName, songName: songName, userId: userId} 
+    ])
+    .select("id")
 
-    if (error) {
-    console.error('Upload failed:', error);
-    } else {
-    console.log('File uploaded successfully:', data);
+    if(data){
+    const filePath = `${userId}/${data[0].id}`; //same path for both buckets, different bucket names
+    
+    //upload to buckets
+    //music bucket
+    const response = await uploadBucket("musicfiles", filePath, encodedMusicFile, 'audio');
+
+    //image bucket
+    if(encodedImgFile !== null){
+    const uploadResponseImage = await uploadBucket("imagefiles", filePath, encodedImgFile, 'image');
+    }
+
+
+
+    //return data upload id
+    return data[0].id;
     }
 
  }
 
-export async function deleteFile(bucketName: string, userId: string, fileName: string){
-    const filePath = `${userId}/${fileName}`;
+export async function deleteFile(userId: string, fileId: string) {
+    const filePath = `${userId}/${fileId}`;
 
+    //music bucket
+    const musicError = await deleteBucket("musicfiles", filePath);
+
+    //image bucket
+    const imageError = await deleteBucket("imagefiles", filePath);
+
+    //table
     const { error } = await supabase
-        .storage
-        .from(bucketName)
-        .remove([filePath]);
-        
-    if (error) {
-        console.error('Error deleting file:', error);
-        return true;
+    .from('songData')
+    .delete()
+    .eq('id', fileId);
+
+    if (error || musicError || imageError) {
+        console.error('Error deleting file:', error || musicError || imageError);
     }
-    console.log('File deleted successfully');
-    return false;
 }
+

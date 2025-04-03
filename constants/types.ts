@@ -7,6 +7,10 @@ type uploadProps = {
     name: string;
     id: string;
     artistName: string;
+    songName: string;
+    //musicURL: string;
+    imageURL: string; // imageURL can be null
   };
+  
 
   export {uploadProps, song};

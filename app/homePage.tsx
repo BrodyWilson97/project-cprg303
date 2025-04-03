@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet } from 'react-native';
 import { useEffect } from 'react';
-import { listFiles, streamFile} from "../lib/supabase_crud";
+import { listFiles, getFileURL} from "../lib/supabase_crud";
 import { useRouter } from "expo-router";
 import { getUser } from "../lib/supabase_auth";
 
@@ -63,9 +63,6 @@ export default function HomeScreen() {
       </View>
 
       {/* Recently Played Section */}
-      <View style={styles.recentlyPlayed}>
-        <Text style={styles.recentlyPlayedTitle}>{user}</Text>
-      </View>
 
       {/* Music Thumbnails */}
       <View style={styles.thumbnails}>
