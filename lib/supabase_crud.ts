@@ -1,6 +1,6 @@
 import supabase from "./db";
 import { song } from "../constants/types";
-import {listBucket, uploadBucket, deleteBucket} from "./supabase_bucket_crud";
+import {listBucket, uploadBucket, deleteBucket, getFilePath} from "./supabase_bucket_crud";
 import { get } from "react-native/Libraries/TurboModule/TurboModuleRegistry";
 
 //list all files in the music bucket for the users folder and the corresponding image and artist name
@@ -47,18 +47,8 @@ export async function listFiles(userId: string){
 //or to get the image url for the song
 export async function getFileURL(bucketName: string, userId: string, fileId: string, timeout: number, fileType: string){
 
-    let filePath = `${userId}/${fileId}`;
-    if(fileType === 'audio') {
-        filePath = filePath + ".mp3"; // Add .mp3 extension for audio files
-    }
-    else if(fileType === 'image') {
-        filePath = filePath + ".png"; // Add .png extension for image files
-    }
-    else{
-        console.error('Invalid file type');
-    }
+    let filePath = getFilePath(userId, fileId, fileType);
 
-    console.log('file path:', filePath);
     const { data, error } = await supabase
     .storage
     .from(bucketName)
@@ -99,15 +89,14 @@ export async function getFileURL(bucketName: string, userId: string, fileId: str
     .select("id")
 
     if(data){
-    const filePath = `${userId}/${data[0].id}`; //same path for both buckets, different bucket names
-    
+
     //upload to buckets
     //music bucket
-    const response = await uploadBucket("musicfiles", filePath, encodedMusicFile, 'audio');
+    const response = await uploadBucket("musicfiles", userId, data[0].id, encodedMusicFile, "audio");
 
     //image bucket
     if(encodedImgFile !== null){
-    const uploadResponseImage = await uploadBucket("imagefiles", filePath, encodedImgFile, 'image');
+    const uploadResponseImage = await uploadBucket("imagefiles", userId, data[0].id, encodedImgFile, "image");
     }
 
 
@@ -118,14 +107,14 @@ export async function getFileURL(bucketName: string, userId: string, fileId: str
 
  }
 
-export async function deleteFile(userId: string, fileId: string) {
-    const filePath = `${userId}/${fileId}`;
+export async function deleteFile(userId: string, fileId: string){ {
+
 
     //music bucket
-    const musicError = await deleteBucket("musicfiles", filePath);
+    const musicError = await deleteBucket("musicfiles", userId, fileId, "audio");
 
     //image bucket
-    const imageError = await deleteBucket("imagefiles", filePath);
+    const imageError = await deleteBucket("imagefiles", userId, fileId, "image");
 
     //table
     const { error } = await supabase
@@ -136,5 +125,5 @@ export async function deleteFile(userId: string, fileId: string) {
     if (error || musicError || imageError) {
         console.error('Error deleting file:', error || musicError || imageError);
     }
-}
+}}
 

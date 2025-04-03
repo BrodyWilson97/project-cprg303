@@ -16,20 +16,10 @@ export async function listBucket(bucketName: string, filePath: string) {
     return data;
 }
 
-export async function uploadBucket(bucketName: string, filePath: string, encodedFile: string, fileType: string) {
+export async function uploadBucket(bucketName: string, userId: string, fileId: string, encodedFile: string, fileType: string, ) {
     let contentType = "";
 
-    if(fileType === 'audio') {
-        contentType = 'audio/mpeg';
-        filePath = filePath + ".mp3"; // Add .mp3 extension for audio files
-    }
-    else if(fileType === 'image') {
-        contentType = 'image/png';
-        filePath = filePath + ".png"; // Add .png extension for image files
-    }
-    else{
-        console.error('Invalid file type');
-    }
+    const filePath = getFilePath(userId, fileId, fileType); 
 
     const { data, error } = await supabase  
     .storage  
@@ -47,8 +37,9 @@ export async function uploadBucket(bucketName: string, filePath: string, encoded
     return data;
 }
 
-export async function deleteBucket(bucketName: string, filePath: string) {
+export async function deleteBucket(bucketName: string, userId: string, fileId: string, fileType: string) {
 
+    const filePath = getFilePath(userId, fileId, fileType);
     const { error } = await supabase
         .storage
         .from(bucketName)
@@ -60,4 +51,19 @@ export async function deleteBucket(bucketName: string, filePath: string) {
     }
     console.log('File deleted successfully');
     return false;
+}
+
+export const getFilePath = (userId: string, fileId: string, fileType: string)=> {
+    let filePath = `${userId}/${fileId}`;
+
+    if(fileType === "audio") {
+        filePath = filePath + ".mp3"; // Add .mp3 extension for audio files
+    }
+    else if(fileType === "image") {
+        filePath = filePath + ".png"; // Add .png extension for image files
+    }
+    else{
+        console.error('Invalid file type');
+    }
+    return filePath;
 }
