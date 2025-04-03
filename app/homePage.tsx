@@ -6,9 +6,7 @@ import { useRouter } from "expo-router";
 import { getUser } from "../lib/supabase_auth";
 
 export default function HomeScreen() {
-  // testing to access current user
   const [user, setUser] = useState<string>("");
-
   const [isPlaying, setIsPlaying] = useState<boolean>(false);
   const router = useRouter();
 
@@ -17,18 +15,15 @@ export default function HomeScreen() {
     if (user) {
       setUser(user.id);
     }
-    else if (!user) return;
   };
 
   useEffect(() => {
     fetchUser();
-
   }, []);
 
   const handlePlayPause = () => {
     setIsPlaying(!isPlaying);
   };
-
 
   function openPlaybackPage(): void {
     router.push("/playbackPage");
@@ -39,30 +34,25 @@ export default function HomeScreen() {
       {/* Search Bar */}
       <View style={styles.searchBar}>
         <Text style={styles.icon}>☰</Text>
-        <TextInput
-          placeholder="Search"
-          style={styles.searchInput}
-        />
+        <TextInput placeholder="Search" style={styles.searchInput} />
         <Text style={styles.icon}>🔍</Text>
       </View>
 
       {/* Tab Navigation */}
       <View style={styles.tabNavigation}>
-        <View style={styles.tabItem}>
+        <TouchableOpacity style={styles.tabItem} onPress={() => router.push("/libraryPage")}>
           <Text style={styles.tabIcon}>🎵</Text>
           <Text style={styles.tabLabel}>Library</Text>
-        </View>
-        <View style={styles.tabItem}>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.tabItem} onPress={() => router.push("/filesPage")}>
           <Text style={styles.tabIcon}>📂</Text>
           <Text style={styles.tabLabel}>Playlist</Text>
-        </View>
+        </TouchableOpacity>
         <TouchableOpacity style={styles.tabItem} onPress={() => router.push("/settingsPage")}>
-            <Text style={styles.tabIcon}>⚙️</Text>
-            <Text style={styles.tabLabel}>Settings</Text>
+          <Text style={styles.tabIcon}>⚙️</Text>
+          <Text style={styles.tabLabel}>Settings</Text>
         </TouchableOpacity>
       </View>
-
-      {/* Recently Played Section */}
 
       {/* Music Thumbnails */}
       <View style={styles.thumbnails}>
@@ -76,22 +66,22 @@ export default function HomeScreen() {
 
       {/* Now Playing Section */}
       <TouchableOpacity style={styles.nowPlaying} onPress={openPlaybackPage}>
-          <Text style={styles.nowPlayingText}>Now Playing</Text>
-          <View style={styles.controls}>
-            <TouchableOpacity>
-              <Text style={styles.controlIcon}>⏪</Text>
-            </TouchableOpacity>
-            <TouchableOpacity onPress={handlePlayPause}>
-              <Text style={styles.controlIcon}>{isPlaying ? '⏸️' : '▶️'}</Text>
-            </TouchableOpacity>
-            <TouchableOpacity>
-              <Text style={styles.controlIcon}>⏩</Text>
-            </TouchableOpacity>
-          </View>
+        <Text style={styles.nowPlayingText}>Now Playing</Text>
+        <View style={styles.controls}>
+          <TouchableOpacity>
+            <Text style={styles.controlIcon}>⏪</Text>
+          </TouchableOpacity>
+          <TouchableOpacity onPress={handlePlayPause}>
+            <Text style={styles.controlIcon}>{isPlaying ? '⏸️' : '▶️'}</Text>
+          </TouchableOpacity>
+          <TouchableOpacity>
+            <Text style={styles.controlIcon}>⏩</Text>
+          </TouchableOpacity>
+        </View>
       </TouchableOpacity>
 
       <TouchableOpacity style={styles.button} onPress={() => router.push("/tempFileManagementCRUD")}>
-        <Text >File Management</Text>
+        <Text>File Management</Text>
       </TouchableOpacity>
     </View>
   );
@@ -147,16 +137,6 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: '#000',
   },
-  recentlyPlayed: {
-    width: '100%',
-    maxWidth: 400,
-    textAlign: 'center',
-    marginBottom: 24,
-  },
-  recentlyPlayedTitle: {
-    fontSize: 24,
-    color: '#000',
-  },
   thumbnails: {
     flexDirection: 'row',
     justifyContent: 'center',
@@ -200,4 +180,3 @@ const styles = StyleSheet.create({
     marginTop: 16,
   }
 });
-
