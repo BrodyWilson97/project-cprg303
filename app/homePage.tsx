@@ -92,8 +92,9 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#E9D8FD',
     alignItems: 'center',
+    justifyContent: 'space-between',
     padding: 16,
-  },
+  },  
   searchBar: {
     backgroundColor: '#D6BCFA',
     width: '100%',

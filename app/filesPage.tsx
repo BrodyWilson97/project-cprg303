@@ -1,108 +1,135 @@
-import React, { useState } from "react";
-import { 
-  View, Text, TextInput, TouchableOpacity, StyleSheet, Image, Alert 
-} from "react-native";
-import * as ImagePicker from "expo-image-picker";
-import { uploadFile } from "../lib/supabase_crud";
-import * as DocumentPicker from "expo-document-picker";
-import * as FileSystem from 'expo-file-system';
-import { uploadProps, song } from "../constants/types";
+import React, { useState, useEffect } from "react";
+import { View, Text, TextInput, TouchableOpacity, FlatList, StyleSheet, Alert, Image } from "react-native";
+import { FileObject } from '@supabase/storage-js';
+import { getFileURL, listFiles, uploadFile, deleteFile } from "../lib/supabase_crud";
+import {getUser} from "../lib/supabase_auth";
 import { useRouter } from "expo-router";
+import {FileUploadScreen} from "./fileUploadScreen";
+import { song } from "../constants/types";
+import { listBucket } from "../lib/supabase_bucket_crud";
+import supabase from "../lib/db";
 
-export default function FilesPage() {
-  const [selectedFile, setSelectedFile] = useState<uploadProps | null>(null);
-  const [filePreview, setFilePreview] = useState<string | null>(null);
+export default function songManagementPage() {
+  const [songs, setSongs] = useState<song[]>([]);
+  const [selectedsong, setSelectedsong] = useState<FileObject | null>(null);
+  const [showUploadModal, setShowUploadModal] = useState<boolean>(false);
+
   const router = useRouter();
+  // testing to access current user
+  const [userID, setUserID] = useState<string>("");
+    
+  const [isPlaying, setIsPlaying] = useState<boolean>(false);
 
-  // Function to pick an image
-  const pickImage = async () => {
-    const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
-      allowsEditing: true,
-      aspect: [4, 3],
-      quality: 1,
-    });
-
-    if (!result.canceled) {
-      setSelectedFile({
-        name: result.assets[0].fileName || "image.jpg",
-        type: result.assets[0].mimeType || "image/jpeg",
-        uri: result.assets[0].uri,
-      });
-      setFilePreview(result.assets[0].uri);
+  const fetchUser = async () => {
+    const { user } = await getUser();
+    if (user) {
+      setUserID(user.id);
     }
+
+    else if (!user) return;
   };
 
-  // Function to pick a document
-  const pickDocument = async () => {
-    const result = await DocumentPicker.getDocumentAsync({
-      type: "*/*",
-    });
+  const fetchsongs = async () => {
 
-    if (result.canceled) return;
+    // fetch song in users folder by their id
+    if (!userID) return;
 
-    setSelectedFile({
-      name: result.assets[0].name,
-      type: result.assets[0].mimeType || "application/octet-stream",
-      uri: result.assets[0].uri,
-    });
+    const data = await listFiles(userID);
 
-    setFilePreview(null); // Reset preview if it's not an image
+    // //auto route to upload screen if no songs are found
+    if(data?.length === 0) {
+      setShowUploadModal(true);
+    }
+
+    if (!data) return;
+
+    setSongs([...data]);
+
   };
 
-  // Function to handle file upload
-  const handleUpload = async () => {
-    if (!selectedFile) {
-      Alert.alert("Error", "No file selected!");
-      return;
+  useEffect(() => {
+    fetchUser();
+  }, []);
+
+  useEffect(() => {
+    fetchsongs();
+
+  }, [userID]);
+
+
+  const addSong = async (song: song) => {
+    //get image url
+    let imgUrl = await getFileURL("imagefiles", userID, song.id, 100000, "image");
+    if (imgUrl?.length === 0) {
+      imgUrl = 'https://community.magicmusic.net/media/unknown-album.294/full?d=1443476842';
     }
 
-    try {
-      const fileInfo = await FileSystem.getInfoAsync(selectedFile.uri);
-      if (!fileInfo.exists) {
-        Alert.alert("Error", "File not found!");
-        return;
-      }
-
-      const response = await fetch(selectedFile.uri);
-      const blob = await response.blob();
-      await uploadFile(selectedFile.name, blob);
-
-      Alert.alert("Success", "File uploaded successfully!");
-      setSelectedFile(null);
-      setFilePreview(null);
-    } catch (error) {
-      Alert.alert("Upload Failed", error.message);
+    if (imgUrl){
+      song.imageURL = imgUrl;
     }
+    setSongs([...songs, song]);
+  }
+
+
+  const handleDelete = async (songId: string) => {
+    const error = await deleteFile(userID, songId);
+
+      Alert.alert("Success", "song deleted successfully!");
+      setSongs((prevsongs) => prevsongs.filter((song) => song.id !== songId));
   };
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Files Page</Text>
-      <Text style={styles.description}>Select and upload your files</Text>
+      {showUploadModal ? (
+        // Show the upload screen
+        <View style={styles.container}>
+          <Text style={styles.title}>Upload song</Text>
+          <FileUploadScreen 
+            userID={userID}
+            addSong= {addSong} />
+          <TouchableOpacity
+            style={styles.uploadButton}
+            onPress={() => setShowUploadModal(false)}
+          >
+            <Text style={styles.uploadButtonText}>Back to song List</Text>
+          </TouchableOpacity>
+        </View>
+      ) : (
+        // Show the song management screen
+        <View style={styles.container}>
+          <TouchableOpacity
+            style={styles.uploadButton}
+            onPress={() => setShowUploadModal(true)}
+          >
+            <Text style={styles.uploadButtonText}>Upload song</Text>
+          </TouchableOpacity>
 
-      <TouchableOpacity style={styles.button} onPress={pickImage}>
-        <Text style={styles.buttonText}>Pick an Image</Text>
-      </TouchableOpacity>
-
-      <TouchableOpacity style={styles.button} onPress={pickDocument}>
-        <Text style={styles.buttonText}>Pick a Document</Text>
-      </TouchableOpacity>
-
-      {filePreview && <Image source={{ uri: filePreview }} style={styles.imagePreview} />}
-
-      {selectedFile && (
-        <Text style={styles.fileName}>Selected File: {selectedFile.name}</Text>
+          <FlatList
+            data={songs}
+            keyExtractor={(item) => item.id}
+            renderItem={({ item }) => (
+              <TouchableOpacity
+                style={styles.songItem}
+                onPress={async () => {
+                  const url = await getFileURL("musicfiles", userID, item.id, 10000, "audio");
+                  console.log("Streaming URL:", url);
+                }}
+              >
+                <Image         
+                      source={{ uri: item.imageURL,}} 
+                      style={{ width: 50, height: 50 }} />
+                <Text style={styles.songName}>{item.songName}</Text>
+                <TouchableOpacity
+                  style={styles.deleteButton}
+                  onPress={() => handleDelete(item.id)}
+                >
+                  <Text style={styles.deleteButtonText}>Delete</Text>
+                </TouchableOpacity>
+              </TouchableOpacity>
+            )}
+          />
+        </View>
       )}
-
-      <TouchableOpacity style={styles.uploadButton} onPress={handleUpload}>
-        <Text style={styles.buttonText}>Upload File</Text>
-      </TouchableOpacity>
-
-      {/* Back Button */}
-      <TouchableOpacity style={styles.button} onPress={() => router.push("/")}>
-        <Text style={styles.buttonText}>Back to Home</Text>
-      </TouchableOpacity>
     </View>
   );
 }
@@ -111,51 +138,80 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#E9D8FD",
-    alignItems: "center",
-    justifyContent: "center",
     padding: 16,
   },
   title: {
     fontSize: 24,
     fontWeight: "bold",
-    marginBottom: 10,
-    color: "#000",
-  },
-  description: {
-    fontSize: 16,
-    color: "#4A5568",
+    marginBottom: 16,
     textAlign: "center",
-    marginBottom: 20,
-  },
-  button: {
-    backgroundColor: "#B794F4",
-    paddingVertical: 12,
-    paddingHorizontal: 20,
-    borderRadius: 8,
-    marginVertical: 10,
   },
   uploadButton: {
-    backgroundColor: "#9F7AEA",
-    paddingVertical: 12,
-    paddingHorizontal: 20,
+    backgroundColor: "#6B46C1",
+    padding: 12,
     borderRadius: 8,
-    marginVertical: 10,
+    alignItems: "center",
+    marginBottom: 16,
   },
-  buttonText: {
+  uploadButtonText: {
+    color: "#FFF",
     fontSize: 16,
-    color: "#000",
-    fontWeight: "bold",
   },
-  fileName: {
-    marginTop: 10,
+  songItem: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    padding: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: "#CBD5E0",
+  },
+  songName: {
     fontSize: 16,
-    color: "#333",
   },
-  imagePreview: {
-    width: 100,
-    height: 100,
-    marginTop: 10,
+  deleteButton: {
+    backgroundColor: "#E53E3E",
+    padding: 8,
+    borderRadius: 4,
+  },
+  deleteButtonText: {
+    color: "#FFF",
+    fontSize: 14,
+  },
+  editButton: {
+    backgroundColor: "#3182CE",
+    padding: 8,
+    borderRadius: 4,
+    marginLeft: 8,
+  },
+  editButtonText: {
+    color: "#FFF",
+    fontSize: 14,
+  },
+  editSection: {
+    marginTop: 16,
+    padding: 16,
+    backgroundColor: "#FFF",
     borderRadius: 8,
+  },
+  editLabel: {
+    fontSize: 16,
+    marginBottom: 8,
+  },
+  input: {
+    borderWidth: 1,
+    borderColor: "#CBD5E0",
+    borderRadius: 8,
+    padding: 8,
+    marginBottom: 8,
+  },
+  saveButton: {
+    backgroundColor: "#6B46C1",
+    padding: 12,
+    borderRadius: 8,
+    alignItems: "center",
+  },
+  saveButtonText: {
+    color: "#FFF",
+    fontSize: 16,
   },
 });
-
