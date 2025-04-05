@@ -46,7 +46,7 @@ export default function HomeScreen() {
         </TouchableOpacity>
         <TouchableOpacity style={styles.tabItem} onPress={() => router.push(`/filesPage/?userID=${user}`)}>
           <Text style={styles.tabIcon}>📂</Text>
-          <Text style={styles.tabLabel}>UploadFiles</Text>
+          <Text style={styles.tabLabel}>Upload Files</Text>
         </TouchableOpacity>
         <TouchableOpacity style={styles.tabItem} onPress={() => router.push("/settingsPage")}>
           <Text style={styles.tabIcon}>⚙️</Text>

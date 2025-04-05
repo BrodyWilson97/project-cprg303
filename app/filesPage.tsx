@@ -212,23 +212,7 @@ uploadBox: {
     height: '80%',
     borderRadius: 8,
   },
-uploadBox: {
-  width: '80%',
-  height: 100,
-  borderWidth: 2,
-  borderColor: '#CBD5E0',
-  borderStyle: 'dashed',
-  borderRadius: 12,
-  margin: 10,
-  alignItems: 'center',
-  justifyContent: 'center',
-  backgroundColor: '#f3e8ff',
-},
-  imagePreview: {
-    width: '30%',
-    height: '80%',
-    borderRadius: 8,
-  },
+
   fileName: {
     marginTop: 10,
     fontSize: 16,
