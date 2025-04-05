@@ -15,7 +15,6 @@ export default function FilesPage(){
   const [artistName, setArtistName] = useState<string>("");
   const [selectedFile, setSelectedFile] = useState<string | null>(null);
   const [filePreview, setFilePreview] = useState<string | null>(null);
-  const [loading, setLoading] = useState<boolean | null>(null);
   const [loadMessage, setLoadMessage] = useState<string>("");
   
   const router = useRouter();
@@ -66,12 +65,10 @@ export default function FilesPage(){
       return;
     }
 
-    setLoading(true);
-    setLoadMessage("Uploading file...");
+    setLoadMessage("Uploading file... Please wait!");
     const id = await uploadFile(userID, name, audioFile, image?.data || "", artistName);
     if(!id) {
       Alert.alert("Error", "File upload failed. Please try again.");
-      setLoading(false);
       return;
     }
     setLoadMessage("File uploaded successfully!");
@@ -87,6 +84,7 @@ export default function FilesPage(){
 
     // Reset the form
     setImage(null);
+    setFilePreview(null);
     setAudioFile(null);
     setSelectedFile(null);
     setName("");
@@ -106,7 +104,7 @@ export default function FilesPage(){
             style={styles.imagePreview}/>
         ) : (
           <View style={{ alignItems: "center" }}>
-            <AntDesign style={{ padding: 16, color: "#4A5568",}} name="picture" size={36} color="black" />
+            <AntDesign style={{ padding: 12, color: "#4A5568",}} name="picture" size={28} color="black" />
             <Text style={styles.description}>Upload Image</Text> 
           </View>
       )}
@@ -118,7 +116,7 @@ export default function FilesPage(){
           <Text style={styles.description}>{selectedFile}</Text>
         ) : (
           <View style={{ alignItems: "center" }}>
-            <AntDesign style={{ padding: 16, color: "#4A5568"}} name="upload" size={36} color="black" />
+            <AntDesign style={{ padding: 12, color: "#4A5568"}} name="upload" size={28} color="black" />
             <Text style={styles.description}>Upload mp3 file</Text> 
           </View>
       )}
@@ -145,9 +143,7 @@ export default function FilesPage(){
         <Text style={styles.buttonText}>Upload</Text>
       </TouchableOpacity>
   
-      {loading && (
         <Text style={styles.description}>{loadMessage}</Text>
-      )}
 
       {/* Back Button */}
       <TouchableOpacity style={styles.button} onPress={() => router.push("/")}>

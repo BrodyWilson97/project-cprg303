@@ -14,11 +14,13 @@ export default function HomeScreen() {
     const { user } = await getUser();
     if (user) {
       setUser(user.id);
+      await listFiles(user.id);
     }
   };
 
   useEffect(() => {
     fetchUser();
+
   }, []);
 
   const handlePlayPause = () => {
@@ -40,7 +42,7 @@ export default function HomeScreen() {
 
       {/* Tab Navigation */}
       <View style={styles.tabNavigation}>
-        <TouchableOpacity style={styles.tabItem} onPress={() => router.push("/libraryPage")}>
+        <TouchableOpacity style={styles.tabItem} onPress={() => router.push(`/libraryPage/?userID=${user}`)}>
           <Text style={styles.tabIcon}>🎵</Text>
           <Text style={styles.tabLabel}>Library</Text>
         </TouchableOpacity>

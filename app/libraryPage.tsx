@@ -1,11 +1,12 @@
-import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView } from 'react-native';
-import { useRouter } from 'expo-router';
+import React, { useState, useEffect } from 'react';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView, Alert, Image } from 'react-native';
+import { useRouter, useLocalSearchParams } from 'expo-router';
 import AntDesign from '@expo/vector-icons/AntDesign';
+import { FileObject } from '@supabase/storage-js';
+import { getFileURL, listFiles, uploadFile, deleteFile } from "../lib/supabase_crud";
+import { song } from "../constants/types";
 
 export default function LibraryPage() {
-  const router = useRouter();
-
   const [activeTab, setActiveTab] = useState<'songs' | 'playlists'>('songs'); // State to toggle tabs
   const [playlists, setPlaylists] = useState([
     { name: 'Playlist 1' },
@@ -13,11 +14,58 @@ export default function LibraryPage() {
     { name: 'Playlist 3' },
   ]); // Sample playlists
 
-  const songs = [
-    { title: 'Song 1', artist: 'Artist 1' },
-    { title: 'Song 2', artist: 'Artist 2' },
-    { title: 'Song 3', artist: 'Artist 3' },
-  ]; // Sample songs array
+    const [songs, setSongs] = useState<song[]>([]);
+    const [selectedsong, setSelectedsong] = useState<FileObject | null>(null);
+    const [showUploadModal, setShowUploadModal] = useState<boolean>(false);
+    const[loading, setLoading] = useState<boolean>(false);
+
+    const router = useRouter();
+    const userID = useLocalSearchParams().userID as string;
+
+
+    const fetchsongs = async () => {
+      setLoading(true);
+
+      if (!userID) return;
+
+      const data = await listFiles(userID);
+
+      if (data?.length === 0) {
+        setShowUploadModal(true);
+      }
+
+      if (!data) return;
+
+      setSongs([...data]);
+      setLoading(false);
+    };
+
+    useEffect(() => {
+      fetchsongs();
+
+    }, []);
+
+    const addSong = async (song: song) => {
+      fetchsongs();
+    }
+    const deleteSong = async (songId: string)=> {
+      await deleteFile(userID, songId);
+      setSongs((prevsongs) => prevsongs.filter((song) => song.id !== songId));
+    }
+    
+    const handleDelete = async (songId: string) => {
+
+        Alert.alert("Delete song", "Are you sure you want to delete this song?", [
+          {
+            text: "Cancel",
+            style: "cancel",
+          },
+          {
+            text: "OK",
+            onPress: () => deleteSong(songId),
+          },
+        ]);
+    };
 
   return (
     <View style={styles.container}>
@@ -54,23 +102,38 @@ export default function LibraryPage() {
 
       {/* Conditional Rendering of Songs or Playlists */}
       {activeTab === 'songs' ? (
-        <ScrollView style={styles.songList}>
-          {songs.map((song, index) => (
-            <TouchableOpacity key={index} style={styles.songItem}>
-              <Text style={styles.songTitle}>{song.title}</Text>
-              <Text style={styles.songArtist}>{song.artist}</Text>
-            </TouchableOpacity>
-          ))}
-        </ScrollView>
-      ) : (
-        <ScrollView style={styles.playlistList}>
-          {playlists.map((playlist, index) => (
-            <View key={index} style={styles.playlistItem}>
-              <Text style={styles.playlistName}>{playlist.name}</Text>
-            </View>
-          ))}
-        </ScrollView>
-      )}
+  <ScrollView style={styles.songList}>
+    {loading ? (
+      <Text>Loading...</Text>
+    ) : (
+      songs.map((song, index) => (
+        <TouchableOpacity key={index} style={styles.songItem}>
+        <Image
+          source={{
+            uri: song.imageURL}}
+          style={{ width: 50, height: 50 }}
+        />
+          <View style={{ width: "65%" }}>
+            <Text style={styles.songTitle}>{song.songName}</Text>
+            <Text style={styles.songArtist}>{song.artistName}</Text>
+          </View>
+          <TouchableOpacity onPress={() => handleDelete(song.id)}>
+            <Text style={{ fontSize: 20 }}>...</Text>
+          </TouchableOpacity>
+        </TouchableOpacity>
+      ))
+    )}
+  </ScrollView>
+) : (
+  <ScrollView style={styles.playlistList}>
+    {playlists.map((playlist, index) => (
+      <View key={index} style={styles.playlistItem}>
+        <Text style={styles.playlistName}>{playlist.name}</Text>
+      </View>
+    ))}
+  </ScrollView>
+)}
+
 
       {/* Manage Playlists Button */}
       {activeTab === 'playlists' && (
@@ -169,11 +232,15 @@ const styles = StyleSheet.create({
     padding: 12,
     marginBottom: 8,
     borderRadius: 8,
+    flexDirection: 'row',
+    flex: 1,
+    columnGap: 20,
   },
   songTitle: {
     fontSize: 16,
     fontWeight: '500',
     color: '#000',
+    paddingBottom: 4,
   },
   songArtist: {
     fontSize: 14,

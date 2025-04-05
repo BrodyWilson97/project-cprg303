@@ -9,9 +9,6 @@ import { get } from "react-native/Libraries/TurboModule/TurboModuleRegistry";
 export async function listFiles(userId: string){
     const filePath = `${userId}`;
 
-    //image files
-    const imgData = await listBucket("imagefiles", filePath);
-
     //table data
     const { data, error } = await supabase
     .from('songData')
@@ -22,25 +19,24 @@ export async function listFiles(userId: string){
         console.error('Error fetching song data:', error);
         return null;
     }
-    
+
     // Combine the data into one array based on the `id`
-    const combinedData: song[] = data;
-    data.map(async (songItem) => {
-        //get the image url for the song
-        let imgUrl = await getFileURL("imagefiles", userId, songItem.id, 100000, "image");
-        console.log("URL: " + imgUrl +"\n");
+    const combinedData: song[] = await Promise.all(
+        data.map(async (songItem) => {
+            let imgUrl = await getFileURL("imagefiles", userId, songItem.id, 100000, "image");
 
-        if (imgUrl === null || imgUrl === undefined || imgUrl.length === 0) {
-            imgUrl = 'https://community.magicmusic.net/media/unknown-album.294/full?d=1443476842';
-        }
+            if (!imgUrl) {
+                imgUrl = 'https://community.magicmusic.net/media/unknown-album.294/full?d=1443476842';
+            }
 
-        if (imgUrl){
-            songItem.imageURL = imgUrl;
-        }
-    })  
-    console.log("mapped url: " + combinedData[0].imageURL+"\n");
+            return {
+                ...songItem,
+                imageURL: imgUrl,
+            };
+        })
+    );
 
-        return combinedData ? combinedData : [];
+    return combinedData ? combinedData : [];
 }
 
 //get temporary signed url for the file to be streamed when user clicks on it from listed file names
@@ -61,15 +57,11 @@ export async function getFileURL(bucketName: string, userId: string, fileId: str
     if (error) {
         console.error('fetch file url failed:', error);
         } 
-
-
     return data.signedUrl;
 }
 
-
-
 //upload song to music bucket, image to image bucket and artist name/song name to table and song id to all
- export async function uploadFile(userId: string, songName: string, encodedMusicFile: string, encodedImgFile: string | null, artistName: string){
+export async function uploadFile(userId: string, songName: string, encodedMusicFile: string, encodedImgFile: string | null, artistName: string){
 
     //file path for each bucket (each folder is the user id) and each file is given a unique id 
     //as the file "name" attribute so we can reference it in the image bucket and song data table
@@ -99,16 +91,13 @@ export async function getFileURL(bucketName: string, userId: string, fileId: str
     const uploadResponseImage = await uploadBucket("imagefiles", userId, data[0].id, encodedImgFile, "image");
     }
 
-
-
     //return data upload id
     return data[0].id;
     }
 
- }
+}
 
-export async function deleteFile(userId: string, fileId: string){ {
-
+export async function deleteFile(userId: string, fileId: string){
 
     //music bucket
     const musicError = await deleteBucket("musicfiles", userId, fileId, "audio");
@@ -125,5 +114,5 @@ export async function deleteFile(userId: string, fileId: string){ {
     if (error || musicError || imageError) {
         console.error('Error deleting file:', error || musicError || imageError);
     }
-}}
+}
 
