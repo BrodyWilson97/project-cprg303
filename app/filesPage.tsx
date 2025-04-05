@@ -146,7 +146,7 @@ export default function FilesPage(){
         <Text style={styles.description}>{loadMessage}</Text>
 
       {/* Back Button */}
-      <TouchableOpacity style={styles.button} onPress={() => router.push("/")}>
+      <TouchableOpacity style={styles.button} onPress={() => router.back()}>
         <Text style={styles.buttonText}>Back to Home</Text>
       </TouchableOpacity>
     </View>

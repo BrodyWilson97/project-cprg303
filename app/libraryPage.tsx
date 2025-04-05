@@ -38,7 +38,7 @@ export default function LibraryPage() {
     useEffect(() => {
       fetchsongs();
 
-    }, []);
+    }, [userID]);
 
     const addSong = async (song: song) => {
       fetchsongs();
@@ -98,24 +98,23 @@ export default function LibraryPage() {
       {/* Conditional Rendering of Songs or Playlists */}
       {activeTab === 'songs' ? (
   <ScrollView style={styles.songList}>
-    {loading ? (
-      <Text>Loading...</Text>
-    ) : (
-      songs.map((song, index) => (
-        <TouchableOpacity key={index} style={styles.songItem}>
-        <Image
-          source={{
-            uri: song.imageURL}}
-          style={{ width: 50, height: 50 }}
-        />
-          <View style={{ width: "65%" }}>
-            <Text style={styles.songTitle}>{song.songName}</Text>
-            <Text style={styles.songArtist}>{song.artistName}</Text>
-          </View>
-          <TouchableOpacity onPress={() => handleDelete(song.id)}>
-            <Text style={{ fontSize: 20 }}>...</Text>
-          </TouchableOpacity>
-        </TouchableOpacity>
+    {loading ? 
+      (<Text>Loading...</Text>) :
+            (songs.map((song, index) => (
+              <TouchableOpacity key={index} style={styles.songItem}>
+              <Image
+                source={{
+                  uri: song.imageURL}}
+                style={{ width: 50, height: 50 }}
+              />
+                <View style={{ width: "65%" }}>
+                  <Text style={styles.songTitle}>{song.songName}</Text>
+                  <Text style={styles.songArtist}>{song.artistName}</Text>
+                </View>
+                <TouchableOpacity onPress={() => handleDelete(song.id)}>
+                  <Text style={{ fontSize: 20 }}>...</Text>
+                </TouchableOpacity>
+              </TouchableOpacity>
       ))
     )}
   </ScrollView>
