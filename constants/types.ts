@@ -1,6 +1,7 @@
 type uploadProps = {
-    userID: string; // Explicitly typed as string
-    addSong: (song: song) => void; // call parent function to update state
+    data: string; // base64 encoded data
+    uri: string;// file name
+    type: string; // file type (e.g., "audio/mpeg")
   };
   
   type song = {

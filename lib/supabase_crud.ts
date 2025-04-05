@@ -28,17 +28,17 @@ export async function listFiles(userId: string){
     data.map(async (songItem) => {
         //get the image url for the song
         let imgUrl = await getFileURL("imagefiles", userId, songItem.id, 100000, "image");
-        if (imgUrl?.length === 0) {
+        console.log("URL: " + imgUrl +"\n");
+
+        if (imgUrl === null || imgUrl === undefined || imgUrl.length === 0) {
             imgUrl = 'https://community.magicmusic.net/media/unknown-album.294/full?d=1443476842';
         }
 
         if (imgUrl){
             songItem.imageURL = imgUrl;
         }
-        // const imageUrl = await getFileURL("imagefiles", userId, songItem.id, 100000, "image");
-        //     songItem.imageURL = imageUrl && imageUrl.length>0  ? imageUrl : 'https://community.magicmusic.net/media/unknown-album.294/full?d=1443476842';
-        // })
-    })
+    })  
+    console.log("mapped url: " + combinedData[0].imageURL+"\n");
 
         return combinedData ? combinedData : [];
 }
@@ -62,7 +62,6 @@ export async function getFileURL(bucketName: string, userId: string, fileId: str
         console.error('fetch file url failed:', error);
         } 
 
-        console.log(data);
 
     return data.signedUrl;
 }
@@ -88,6 +87,7 @@ export async function getFileURL(bucketName: string, userId: string, fileId: str
     ])
     .select("id")
 
+    console.log("song data: " + data + "\n");
     if(data){
 
     //upload to buckets

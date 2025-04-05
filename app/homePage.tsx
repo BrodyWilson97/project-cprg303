@@ -44,9 +44,9 @@ export default function HomeScreen() {
           <Text style={styles.tabIcon}>🎵</Text>
           <Text style={styles.tabLabel}>Library</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={styles.tabItem} onPress={() => router.push("/filesPage")}>
+        <TouchableOpacity style={styles.tabItem} onPress={() => router.push(`/filesPage/?userID=${user}`)}>
           <Text style={styles.tabIcon}>📂</Text>
-          <Text style={styles.tabLabel}>Files</Text>
+          <Text style={styles.tabLabel}>UploadFiles</Text>
         </TouchableOpacity>
         <TouchableOpacity style={styles.tabItem} onPress={() => router.push("/settingsPage")}>
           <Text style={styles.tabIcon}>⚙️</Text>
@@ -80,9 +80,6 @@ export default function HomeScreen() {
         </View>
       </TouchableOpacity>
 
-      <TouchableOpacity style={styles.button} onPress={() => router.push("/tempFileManagementCRUD")}>
-        <Text>File Management</Text>
-      </TouchableOpacity>
     </View>
   );
 }

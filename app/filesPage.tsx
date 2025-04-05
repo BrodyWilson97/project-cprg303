@@ -1,135 +1,158 @@
-import React, { useState, useEffect } from "react";
-import { View, Text, TextInput, TouchableOpacity, FlatList, StyleSheet, Alert, Image } from "react-native";
-import { FileObject } from '@supabase/storage-js';
-import { getFileURL, listFiles, uploadFile, deleteFile } from "../lib/supabase_crud";
-import {getUser} from "../lib/supabase_auth";
-import { useRouter } from "expo-router";
-import {FileUploadScreen} from "./fileUploadScreen";
-import { song } from "../constants/types";
-import { listBucket } from "../lib/supabase_bucket_crud";
-import supabase from "../lib/db";
+import React, { useState } from "react";
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, Image, Alert } from "react-native";
+import * as ImagePicker from "expo-image-picker";
+import { uploadFile } from "../lib/supabase_crud";
+import * as DocumentPicker from "expo-document-picker";
+import AntDesign from '@expo/vector-icons/AntDesign';
+import * as FileSystem from 'expo-file-system';
+import { uploadProps, song } from "../constants/types";
+import { useRouter, useLocalSearchParams } from "expo-router";
 
-export default function songManagementPage() {
-  const [songs, setSongs] = useState<song[]>([]);
-  const [selectedsong, setSelectedsong] = useState<FileObject | null>(null);
-  const [showUploadModal, setShowUploadModal] = useState<boolean>(false);
-
+export default function FilesPage(){
+  const [image, setImage] = useState<uploadProps | null>(null);
+  const [audioFile, setAudioFile] = useState<string | null>(null);
+  const [name, setName] = useState<string>("");
+  const [artistName, setArtistName] = useState<string>("");
+  const [selectedFile, setSelectedFile] = useState<string | null>(null);
+  const [filePreview, setFilePreview] = useState<string | null>(null);
+  const [loading, setLoading] = useState<boolean | null>(null);
+  const [loadMessage, setLoadMessage] = useState<string>("");
+  
   const router = useRouter();
-  // testing to access current user
-  const [userID, setUserID] = useState<string>("");
-    
-  const [isPlaying, setIsPlaying] = useState<boolean>(false);
+  const userID = useLocalSearchParams().userID as string;
 
-  const fetchUser = async () => {
-    const { user } = await getUser();
-    if (user) {
-      setUserID(user.id);
-    }
+    //get the file from the devices native file system and encode it from ascii binary?? to base64 then base64 to supabase upload
+    const handleAudioPick = async () => {
+      const result = await DocumentPicker.getDocumentAsync({ type: "audio/*" });
 
-    else if (!user) return;
+  
+      if(result && result.canceled === false) {
+      const base64File = await FileSystem.readAsStringAsync(result.assets[0].uri, {
+       encoding: 'base64'});
+        
+      setAudioFile(base64File);
+      setSelectedFile(result.assets[0].name);
+      }
+    };
+
+
+  const handleImagePick = async () => {
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ['images'],
+      allowsEditing: true,
+      aspect: [4, 3],
+      quality: 1,
+    });
+
+    if(result  && !result.canceled) {
+      const base64File = await FileSystem.readAsStringAsync(result.assets[0].uri, {
+       encoding: 'base64'});
+        
+      setImage({
+        data: base64File, 
+        uri: result.assets[0].uri, 
+        type: result.assets[0].type || "image/jpeg"
+      });
+
+      setFilePreview(result.assets[0].uri);
+      }
+
   };
 
-  const fetchsongs = async () => {
 
-    // fetch song in users folder by their id
-    if (!userID) return;
-
-    const data = await listFiles(userID);
-
-    // //auto route to upload screen if no songs are found
-    if(data?.length === 0) {
-      setShowUploadModal(true);
+  const handleSubmit = async () => {
+    if (!audioFile || !name || !artistName) {
+      Alert.alert("Error", "Please fill out all fields");
+      return;
     }
 
-    if (!data) return;
-
-    setSongs([...data]);
-
-  };
-
-  useEffect(() => {
-    fetchUser();
-  }, []);
-
-  useEffect(() => {
-    fetchsongs();
-
-  }, [userID]);
-
-
-  const addSong = async (song: song) => {
-    //get image url
-    let imgUrl = await getFileURL("imagefiles", userID, song.id, 100000, "image");
-    if (imgUrl?.length === 0) {
-      imgUrl = 'https://community.magicmusic.net/media/unknown-album.294/full?d=1443476842';
+    setLoading(true);
+    setLoadMessage("Uploading file...");
+    const id = await uploadFile(userID, name, audioFile, image?.data || "", artistName);
+    if(!id) {
+      Alert.alert("Error", "File upload failed. Please try again.");
+      setLoading(false);
+      return;
     }
+    setLoadMessage("File uploaded successfully!");
 
-    if (imgUrl){
-      song.imageURL = imgUrl;
-    }
-    setSongs([...songs, song]);
-  }
+    // Add the file to the parent component's state
+    const song: song = {
+      name: name,
+      id: id,
+      artistName: artistName,
+      songName: name,
+      imageURL: "",
+    };
 
-
-  const handleDelete = async (songId: string) => {
-    const error = await deleteFile(userID, songId);
-
-      Alert.alert("Success", "song deleted successfully!");
-      setSongs((prevsongs) => prevsongs.filter((song) => song.id !== songId));
+    // Reset the form
+    setImage(null);
+    setAudioFile(null);
+    setSelectedFile(null);
+    setName("");
+    setArtistName("");
   };
 
   return (
     <View style={styles.container}>
-      {showUploadModal ? (
-        // Show the upload screen
-        <View style={styles.container}>
-          <Text style={styles.title}>Upload song</Text>
-          <FileUploadScreen 
-            userID={userID}
-            addSong= {addSong} />
-          <TouchableOpacity
-            style={styles.uploadButton}
-            onPress={() => setShowUploadModal(false)}
-          >
-            <Text style={styles.uploadButtonText}>Back to song List</Text>
-          </TouchableOpacity>
-        </View>
-      ) : (
-        // Show the song management screen
-        <View style={styles.container}>
-          <TouchableOpacity
-            style={styles.uploadButton}
-            onPress={() => setShowUploadModal(true)}
-          >
-            <Text style={styles.uploadButtonText}>Upload song</Text>
-          </TouchableOpacity>
+      <Text style={styles.title}>Files Page</Text>
+      <Text style={styles.description}>Select and upload your files</Text>
 
-          <FlatList
-            data={songs}
-            keyExtractor={(item) => item.id}
-            renderItem={({ item }) => (
-              <TouchableOpacity
-                style={styles.songItem}
-                onPress={async () => {
-                  const url = await getFileURL("musicfiles", userID, item.id, 10000, "audio");
-                  console.log("Streaming URL:", url);
-                }}
-              >
-                <Image         
-                      source={{ uri: item.imageURL,}} 
-                      style={{ width: 50, height: 50 }} />
-                <Text style={styles.songName}>{item.songName}</Text>
-                <TouchableOpacity
-                  style={styles.deleteButton}
-                  onPress={() => handleDelete(item.id)}
-                >
-                  <Text style={styles.deleteButtonText}>Delete</Text>
-                </TouchableOpacity>
-              </TouchableOpacity>
-            )}
-          />
-        </View>
+      {/* Image Upload */}
+      <TouchableOpacity style={styles.uploadBox} onPress={handleImagePick}>
+        {filePreview ? (
+          <Image
+            source={{ uri: filePreview }}
+            style={styles.imagePreview}/>
+        ) : (
+          <View style={{ alignItems: "center" }}>
+            <AntDesign style={{ padding: 16, color: "#4A5568",}} name="picture" size={36} color="black" />
+            <Text style={styles.description}>Upload Image</Text> 
+          </View>
       )}
+      </TouchableOpacity>
+
+      {/* Audio Upload */}
+      <TouchableOpacity style={styles.uploadBox} onPress={handleAudioPick}>
+        {selectedFile ? (
+          <Text style={styles.description}>{selectedFile}</Text>
+        ) : (
+          <View style={{ alignItems: "center" }}>
+            <AntDesign style={{ padding: 16, color: "#4A5568"}} name="upload" size={36} color="black" />
+            <Text style={styles.description}>Upload mp3 file</Text> 
+          </View>
+      )}
+      </TouchableOpacity>
+
+      {/* Name Input */}
+      <TextInput
+        style={styles.input}
+        placeholder="Enter Track Name"
+        value={name}
+        onChangeText={setName}
+      />
+
+      {/* Artist Name Input */}
+      <TextInput
+        style={styles.input}
+        placeholder="Enter Artist Name"
+        value={artistName}
+        onChangeText={setArtistName}
+      />
+
+      {/* Submit Button */}
+      <TouchableOpacity style={styles.submitButton} onPress={handleSubmit}>
+        <Text style={styles.buttonText}>Upload</Text>
+      </TouchableOpacity>
+  
+      {loading && (
+        <Text style={styles.description}>{loadMessage}</Text>
+      )}
+
+      {/* Back Button */}
+      <TouchableOpacity style={styles.button} onPress={() => router.push("/")}>
+        <Text style={styles.buttonText}>Back to Home</Text>
+      </TouchableOpacity>
     </View>
   );
 }
@@ -139,22 +162,29 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "#E9D8FD",
     padding: 16,
+    alignItems: "center",
   },
   title: {
     fontSize: 24,
     fontWeight: "bold",
     marginBottom: 16,
+    color: "#000",
+  },
+  description: {
+    fontSize: 16,
+    color: "#4A5568",
     textAlign: "center",
+    marginBottom: 5,
+    height: 20,
   },
-  uploadButton: {
-    backgroundColor: "#6B46C1",
-    padding: 12,
+  button: {
+    backgroundColor: "#B794F4",
+    paddingVertical: 12,
+    paddingHorizontal: 20,
     borderRadius: 8,
-    alignItems: "center",
-    marginBottom: 16,
+    marginVertical: 10,
   },
-  uploadButtonText: {
-    color: "#FFF",
+  buttonText: {
     fontSize: 16,
   },
   songItem: {
@@ -165,52 +195,46 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: "#CBD5E0",
   },
-  songName: {
-    fontSize: 16,
-  },
-  deleteButton: {
-    backgroundColor: "#E53E3E",
-    padding: 8,
-    borderRadius: 4,
-  },
-  deleteButtonText: {
-    color: "#FFF",
-    fontSize: 14,
-  },
-  editButton: {
-    backgroundColor: "#3182CE",
-    padding: 8,
-    borderRadius: 4,
-    marginLeft: 8,
-  },
-  editButtonText: {
-    color: "#FFF",
-    fontSize: 14,
-  },
-  editSection: {
-    marginTop: 16,
-    padding: 16,
-    backgroundColor: "#FFF",
+uploadBox: {
+  width: '80%',
+  height: 100,
+  borderWidth: 2,
+  borderColor: '#CBD5E0',
+  borderStyle: 'dashed',
+  borderRadius: 12,
+  margin: 10,
+  alignItems: 'center',
+  justifyContent: 'center',
+  backgroundColor: '#f3e8ff',
+},
+  imagePreview: {
+    width: '30%',
+    height: '80%',
     borderRadius: 8,
   },
-  editLabel: {
+  fileName: {
+    marginTop: 10,
     fontSize: 16,
-    marginBottom: 8,
+    color: "#333",
   },
   input: {
-    borderWidth: 1,
-    borderColor: "#CBD5E0",
+    width: "80%",
+    padding: 12,
     borderRadius: 8,
-    padding: 8,
-    marginBottom: 8,
+    borderColor: "#CBD5E0",
+    borderWidth: 1,
+    marginBottom: 16,
+    backgroundColor: "#FFF",
   },
-  saveButton: {
-    backgroundColor: "#6B46C1",
+  submitButton: {
+    backgroundColor: "#9F7AEA",
     padding: 12,
     borderRadius: 8,
     alignItems: "center",
+    marginBottom: 16,
+    width: "80%",
   },
-  saveButtonText: {
+  submitButtonText: {
     color: "#FFF",
     fontSize: 16,
   },
