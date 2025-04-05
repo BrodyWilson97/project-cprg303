@@ -16,7 +16,6 @@ export default function LibraryPage() {
 
     const [songs, setSongs] = useState<song[]>([]);
     const [selectedsong, setSelectedsong] = useState<FileObject | null>(null);
-    const [showUploadModal, setShowUploadModal] = useState<boolean>(false);
     const[loading, setLoading] = useState<boolean>(false);
 
     const router = useRouter();
@@ -29,10 +28,6 @@ export default function LibraryPage() {
       if (!userID) return;
 
       const data = await listFiles(userID);
-
-      if (data?.length === 0) {
-        setShowUploadModal(true);
-      }
 
       if (!data) return;
 
@@ -151,9 +146,9 @@ export default function LibraryPage() {
           <Text style={styles.navIcon}>🏠</Text>
           <Text style={styles.navLabel}>Home</Text>
         </TouchableOpacity>
-        <TouchableOpacity onPress={() => router.push('/playlistCreationPage')}>
+        <TouchableOpacity onPress={() => router.navigate(`/filesPage/?userID=${userID}`)}>
           <Text style={styles.navIcon}>📂</Text>
-          <Text style={styles.navLabel}>Playlists</Text>
+          <Text style={styles.navLabel}>Upload Files</Text>
         </TouchableOpacity>
         <TouchableOpacity onPress={() => router.push('/settingsPage')}>
           <Text style={styles.navIcon}>⚙️</Text>

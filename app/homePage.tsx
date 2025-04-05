@@ -42,11 +42,11 @@ export default function HomeScreen() {
 
       {/* Tab Navigation */}
       <View style={styles.tabNavigation}>
-        <TouchableOpacity style={styles.tabItem} onPress={() => router.push(`/libraryPage/?userID=${user}`)}>
+        <TouchableOpacity style={styles.tabItem} onPress={() => router.navigate(`/libraryPage/?userID=${user}`)}>
           <Text style={styles.tabIcon}>🎵</Text>
           <Text style={styles.tabLabel}>Library</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={styles.tabItem} onPress={() => router.push(`/filesPage/?userID=${user}`)}>
+        <TouchableOpacity style={styles.tabItem} onPress={() => router.navigate(`/filesPage/?userID=${user}`)}>
           <Text style={styles.tabIcon}>📂</Text>
           <Text style={styles.tabLabel}>Upload Files</Text>
         </TouchableOpacity>
