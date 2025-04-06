@@ -75,7 +75,6 @@ export default function FilesPage(){
 
     // Add the file to the parent component's state
     const song: song = {
-      name: name,
       id: id,
       artistName: artistName,
       songName: name,

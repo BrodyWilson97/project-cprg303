@@ -4,9 +4,6 @@ import Checkbox from 'expo-checkbox';
 import { signIn, signOut } from "../lib/supabase_auth";
 import { useEffect, useState } from "react";
 import { useRouter } from "expo-router";
-import { AudioPlayerProvider } from "../context/audio-player-context";
-import { AudioPlayerControls } from "../components/audioControls";
-import { Playlist } from "../components/playList";
 
 export default function App() {
   const [email, setEmail] = useState<string>("");
@@ -27,12 +24,6 @@ export default function App() {
 
   return (
       <View style={styles.container}>
-
-        {/* Controls for testing */}
-        <View style={styles.container}>
-          <AudioPlayerControls/>
-          <Playlist/>
-        </View>
 
         <Text style={styles.title}>Harmoniq</Text>
         <View style={styles.form}>

@@ -15,9 +15,9 @@ import { testTracks } from '../lib/testTracks';
 
 // ======================== Type Definitions ========================
 export interface Track {
-    id: number;           // Required for track comparison
+    id: number | string;           // Required for track comparison
     title: string;
-    uri: string;          // Audio URI (local/remote)
+    uri: string | null;          // Audio URI (local/remote)
     artist?: string;
     thumbnail?: string;   // Optional cover art
 }
@@ -47,6 +47,7 @@ interface AudioPlayerContextType {
     
     // Playlist management
     setPlaylist: Dispatch<SetStateAction<Track[]>>;
+    setCurrentTrack: Dispatch<SetStateAction<Track | null>>;
 }
 
 // ======================== Context Setup ========================
@@ -64,7 +65,8 @@ export const AudioPlayerProvider = ({ children }: { children: ReactNode }) => {
     const [isSeeking, setIsSeeking] = useState(false);
     const [sliderValue, setSliderValue] = useState(0);
     // testTracks hard coded for testing
-    const [playlist, setPlaylist] = useState<Track[]>(testTracks);
+    const [playlist, setPlaylist] = useState<Track[]>([]);
+
 
     // Load and play a track
     const playTrack = async (track: Track) => {
@@ -75,6 +77,10 @@ export const AudioPlayerProvider = ({ children }: { children: ReactNode }) => {
             }
 
             // Load new sound
+            if (track.uri === null) {
+                (console.log("Track URI is null, unable to play."));
+                return;
+            }
             const { sound: newSound } = await Audio.Sound.createAsync(
                 { uri: track.uri },
                 { shouldPlay: true },
@@ -216,6 +222,7 @@ export const AudioPlayerProvider = ({ children }: { children: ReactNode }) => {
         playPreviousTrack,
         seekToPosition,
         setPlaylist,
+        setCurrentTrack,
         repeat,
         shuffle,
         handleSlidingComplete,

@@ -5,50 +5,69 @@ import AntDesign from '@expo/vector-icons/AntDesign';
 import { FileObject } from '@supabase/storage-js';
 import { getFileURL, listFiles, deleteFile, listPlaylists } from "../lib/supabase_crud";
 import { song, playlist } from "../constants/types";
+import { useAudioPlayerContext } from '../context/audio-player-context';
+import { Playlist, } from '../components/playList';
+import { AudioPlayerControls } from "../components/audioControls";
 
 export default function LibraryPage() {
+  const { 
+      setPlaylist,   //playlist refers to all library songs here for audio player context
+      setCurrentTrack //sets current track state in audioplayer context
+  } = useAudioPlayerContext();
+
   const [activeTab, setActiveTab] = useState<'songs' | 'playlists'>('songs'); // State to toggle tabs
   const [playlists, setPlaylists] = useState<playlist[]>([]);
+  //songs usestate not needed since they are assigned in the audioplayer context
 
-    const [songs, setSongs] = useState<song[]>([]);
-    const [selectedsong, setSelectedsong] = useState<FileObject | null>(null);
-    const[loading, setLoading] = useState<boolean>(false);
+  //const [selectedsong, setSelectedsong] = useState<FileObject | null>(null);
+  const[loading, setLoading] = useState<boolean>(false);
 
-    const router = useRouter();
-    const userID = useLocalSearchParams().userID as string;
+  const router = useRouter();
+  const userID = useLocalSearchParams().userID as string;
 
-    const fetchPlaylists = async () => {
-      // Fetch playlists from Supabase and set the state
-      const data = await listPlaylists(userID);
-  
-      if (!data) return; //leave page blank
-      setPlaylists([...data]);
-    }
+  //for playlists tabs display all playlist names
+  const fetchPlaylists = async () => {
+    setLoading(true);
+    // Fetch playlists from Supabase and set the state
+    const data = await listPlaylists(userID);
 
-    const fetchsongs = async () => {
-      setLoading(true);
+    if (!data) return; //leave page blank
+    //refers to all playlists not the audio player context playlist
+    setPlaylists([...data]);
+    setLoading(false);
+  }
 
-      if (!userID) return;
+  const fetchSongs = async () => {
+    setLoading(true);
 
-      const data = await listFiles(userID);
+    if (!userID) return;
 
-      if (!data) return;
+    const data = await listFiles(userID);
 
-      setSongs([...data]);
-      setLoading(false);
-    };
+    if (!data) return;
+
+    //convert song type to track!!
+    //this playlist refers to all library songs here for audio player context
+    //they are mapped in the playlist component
+    setPlaylist(data.map((song) => ({
+      id: song.id,
+      title: song.songName,
+      artist: song.artistName,
+      thumbnail: song.imageURL,
+      uri: null, //placeholder, will be assigned when item is clicked
+    })));
+    setLoading(false);
+  };
 
     useEffect(() => {
-      fetchsongs();
+      fetchSongs();
       fetchPlaylists();
     }, []);
 
-    const addSong = async (song: song) => {
-      fetchsongs();
-    }
+
     const deleteSong = async (songId: string)=> {
       await deleteFile(userID, songId);
-      setSongs((prevsongs) => prevsongs.filter((song) => song.id !== songId));
+      fetchSongs(); // Refresh the song list after deletion
     }
     
     const handleDelete = async (songId: string) => {
@@ -99,37 +118,42 @@ export default function LibraryPage() {
       </View>
 
       {/* Conditional Rendering of Songs or Playlists */}
-      {activeTab === 'songs' ? (
-  <ScrollView style={styles.songList}>
-    {loading ? 
-      (<Text>Loading...</Text>) :
-            (songs.map((song, index) => (
-              <TouchableOpacity key={index} style={styles.songItem}>
-              <Image
-                source={{
-                  uri: song.imageURL}}
-                style={{ width: 50, height: 50 }}
-              />
-                <View style={{ width: "65%" }}>
-                  <Text style={styles.songTitle}>{song.songName}</Text>
-                  <Text style={styles.songArtist}>{song.artistName}</Text>
-                </View>
-                <TouchableOpacity onPress={() => handleDelete(song.id)}>
-                  <Text style={{ fontSize: 20 }}>...</Text>
-                </TouchableOpacity>
-              </TouchableOpacity>
-      ))
-    )}
-  </ScrollView>
-) : (
-  <ScrollView style={styles.playlistList}>
-    {playlists.map((playlist, index) => (
-      <View key={index} style={styles.playlistItem}>
-        <Text style={styles.playlistName}>{playlist.playlistName}</Text>
-      </View>
-    ))}
-  </ScrollView>
-)}
+      {activeTab === 'songs' ? 
+        (loading ?
+              (<Text>Loading...</Text>) :
+              ( <Playlist fetchSongs={fetchSongs} userId={userID} /> )) 
+//   <ScrollView style={styles.songList}>
+//     {loading ? 
+//       (<Text>Loading...</Text>) :
+//             (songs.map((song, index) => (
+//               <TouchableOpacity key={index} style={styles.songItem}>
+//               <Image
+//                 source={{
+//                   uri: song.imageURL}}
+//                 style={{ width: 50, height: 50 }}
+//               />
+//                 <View style={{ width: "65%" }}>
+//                   <Text style={styles.songTitle}>{song.songName}</Text>
+//                   <Text style={styles.songArtist}>{song.artistName}</Text>
+//                 </View>
+//                 <TouchableOpacity onPress={() => handleDelete(song.id)}>
+//                   <Text style={{ fontSize: 20 }}>...</Text>
+//                 </TouchableOpacity>
+//               </TouchableOpacity>
+//       ))
+//     )}
+//   </ScrollView>
+// ) : (
+        :(loading ?
+          (<Text>Loading...</Text>) :
+          ( <ScrollView style={styles.playlistList}>
+          {playlists.map((playlist, index) => (
+                <TouchableOpacity key={index} style={styles.playlistItem} onPress={() => router.push(`/viewPlaylistPage/?userID=${userID}&playlistID=${playlist.id}&playlistName=${playlist.playlistName}`)}>
+              <Text style={styles.playlistName}>{playlist.playlistName}</Text>
+            </TouchableOpacity>
+          ))}
+        </ScrollView>)
+      )}
 
 
       {/* Manage Playlists Button */}
@@ -141,6 +165,8 @@ export default function LibraryPage() {
           <Text style={styles.buttonText}>Manage Playlists</Text>
         </TouchableOpacity>
       )}
+
+      <AudioPlayerControls />
 
       {/* Bottom Navigation */}
       <View style={styles.bottomNav}>
@@ -201,12 +227,13 @@ const styles = StyleSheet.create({
     maxWidth: 400,
     flexDirection: 'row',
     justifyContent: 'space-around',
-    paddingVertical: 12,
+    paddingVertical: 6,
     borderRadius: 12,
-    marginBottom: 24,
+    marginBottom: 16,
   },
   tabItem: {
     alignItems: 'center',
+    padding: 8,
   },
   tabIcon: {
     color: '#000',
@@ -219,6 +246,7 @@ const styles = StyleSheet.create({
   activeTab: {
     backgroundColor: '#9F7AEA',
     borderRadius: 8,
+    padding: 8,
   },
   songList: {
     width: '100%',

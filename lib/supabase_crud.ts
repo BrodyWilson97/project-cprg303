@@ -44,7 +44,7 @@ export async function listFiles(userId: string){
 export async function getFileURL(bucketName: string, userId: string, fileId: string, timeout: number, fileType: string){
 
     let filePath = getFilePath(userId, fileId, fileType);
-
+    
     const { data, error } = await supabase
     .storage
     .from(bucketName)
@@ -157,6 +157,21 @@ export async function listPlaylists(userId: string) {
 
     if (error) {
         console.error('Error fetching playlists:', error);
+        return null;
+    }
+
+    return data;
+}
+
+export async function getPlaylistSongs(userId: string, playlistId: string) {
+    const { data, error } = await supabase
+        .from('songData')
+        .select('*')
+        .eq('playlistId', playlistId)
+        .eq('userId', userId);
+
+    if (error) {
+        console.error('Error fetching playlist songs:', error);
         return null;
     }
 
