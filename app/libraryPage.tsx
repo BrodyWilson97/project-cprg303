@@ -5,6 +5,7 @@ import { listFiles, listPlaylists } from "../lib/supabase_crud";
 import { playlist } from "../constants/types";
 import { useAudioPlayerContext } from '../context/audio-player-context';
 import { Playlist } from '../components/playList';
+import { AudioPlayerControlsFooter } from '../components/audioControlsFooter';
 
 export default function LibraryPage() {
   const { 
@@ -102,7 +103,9 @@ export default function LibraryPage() {
           <Text style={styles.buttonText}>Manage Playlists</Text>
         </TouchableOpacity>
       )}
-
+        
+        {/* Now Playing Section */}
+      <AudioPlayerControlsFooter/>
       {/* Bottom Navigation */}
       <View style={styles.bottomNav}>
         <TouchableOpacity onPress={() => router.back()}>
@@ -117,6 +120,8 @@ export default function LibraryPage() {
           <Text style={styles.navIcon}>⚙️</Text>
           <Text style={styles.navLabel}>Settings</Text>
         </TouchableOpacity>
+        
+        
       </View>
     </View>
   );

@@ -1,3 +1,6 @@
+// I may try to split up the context into multiple contexts in the future
+// for better performance, maybe by doing a playlist context and a player/playback context
+
 import React, { 
     createContext, 
     useContext, 
@@ -57,7 +60,9 @@ const AudioPlayerContext = createContext<AudioPlayerContextType | undefined>(und
 export const AudioPlayerProvider = ({ children }: { children: ReactNode }) => {
     const [sound, setSound] = useState<Audio.Sound | null>(null);
     const [isPlaying, setIsPlaying] = useState(false);
-    const [currentTrack, setCurrentTrack] = useState<Track | null>(null);
+    // hardcoded for testing
+    // const [currentTrack, setCurrentTrack] = useState<Track | null>(null);
+    const [currentTrack, setCurrentTrack] = useState<Track | null>(testTracks[0]);
     const [duration, setDuration] = useState(0);
     const [position, setPosition] = useState(0);
     const [isRepeat, setIsRepeat] = useState(false);

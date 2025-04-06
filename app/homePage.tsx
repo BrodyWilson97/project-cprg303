@@ -5,6 +5,16 @@ import { useRouter } from "expo-router";
 import { getUser } from "../lib/supabase_auth";
 import { Ionicons } from '@expo/vector-icons'; // Importing Ionicons
 
+import { NextTrack } from '../components/controlComponents/nextTrack';
+import { PrevTrack } from '../components/controlComponents/prevTrack';
+import { TogglePlayPause } from '../components/controlComponents/togglePlayPause';
+import { testTracks } from '../lib/testTracks';
+import { Shuffle } from '../components/controlComponents/shuffle';
+import { Repeat } from '../components/controlComponents/repeat';
+import { ProgressBar } from '../components/controlComponents/progressBar';
+import { AudioPlayerControlsFooter } from '../components/audioControlsFooter';
+
+
 export default function HomeScreen() {
   const [user, setUser] = useState<string>("");
   const [isPlaying, setIsPlaying] = useState<boolean>(false);
@@ -39,8 +49,23 @@ export default function HomeScreen() {
         <Text style={styles.icon}>🔍</Text>
       </View>
 
+      
+
+      {/* Music Thumbnails */}
+      <View style={styles.thumbnails}>
+        <View style={styles.thumbnail}>
+          <Text>🖼️</Text>
+        </View>
+        <View style={styles.thumbnail}>
+          <Text>🖼️</Text>
+        </View>
+      </View>
+
+      {/* Now Playing Section */}
+
+      <AudioPlayerControlsFooter/>
       {/* Tab Navigation */}
-      <View style={styles.tabNavigation}>
+      <View style={styles.bottomNav}>
         <TouchableOpacity style={styles.tabItem} onPress={() => router.push(`/libraryPage/?userID=${user}`)}>
           <Text style={styles.tabIcon}>🎵</Text>
           <Text style={styles.tabLabel}>Library</Text>
@@ -54,32 +79,22 @@ export default function HomeScreen() {
           <Text style={styles.tabLabel}>Settings</Text>
         </TouchableOpacity>
       </View>
+      
 
-      {/* Music Thumbnails */}
-      <View style={styles.thumbnails}>
-        <View style={styles.thumbnail}>
-          <Text>🖼️</Text>
-        </View>
-        <View style={styles.thumbnail}>
-          <Text>🖼️</Text>
-        </View>
-      </View>
-
-      {/* Now Playing Section */}
-      <TouchableOpacity style={styles.nowPlaying} onPress={openPlaybackPage}>
+      {/* <TouchableOpacity style={styles.nowPlaying} onPress={openPlaybackPage}>
         <Text style={styles.nowPlayingText}>Now Playing</Text>
         <View style={styles.controls}>
           <TouchableOpacity>
-            <Ionicons name="play-back" size={36} color="#000" /> {/* Previous Icon */}
+            <Ionicons name="play-back" size={36} color="#000" /> 
           </TouchableOpacity>
           <TouchableOpacity onPress={handlePlayPause}>
-            <Ionicons name={isPlaying ? 'pause' : 'play'} size={48} color="#000" /> {/* Play/Pause Icon */}
+            <Ionicons name={isPlaying ? 'pause' : 'play'} size={48} color="#000" />
           </TouchableOpacity>
           <TouchableOpacity>
-            <Ionicons name="play-forward" size={36} color="#000" /> {/* Next Icon */}
+            <Ionicons name="play-forward" size={36} color="#000" /> 
           </TouchableOpacity>
         </View>
-      </TouchableOpacity>
+      </TouchableOpacity> */}
     </View>
   );
 }
@@ -150,22 +165,14 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  nowPlaying: {
+  bottomNav: {
     backgroundColor: '#B794F4',
     width: '100%',
     maxWidth: 400,
-    padding: 16,
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    paddingVertical: 12,
     borderRadius: 12,
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
-  nowPlayingText: {
-    color: '#000',
-  },
-  controls: {
-    flexDirection: 'row',
-    gap: 16,
-    alignItems: 'center',
+    marginTop: 24,
   },
 });

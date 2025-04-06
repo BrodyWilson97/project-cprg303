@@ -19,7 +19,7 @@ export const ProgressBar = () => {
     };
 
     return (
-        <View>
+        <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
             <Slider 
                 style={styles.progressBar} 
                 minimumValue={0} 
@@ -32,7 +32,7 @@ export const ProgressBar = () => {
                 thumbTintColor="#000"
             />
             <View style={styles.timeContainer}>
-                <Text>{formatTime(position)}</Text>
+                <Text>{formatTime(position)} / </Text>
                 <Text>{formatTime(duration)}</Text>
             </View>
         </View>
@@ -41,8 +41,7 @@ export const ProgressBar = () => {
 
 const styles = StyleSheet.create({
     progressBar: {
-        width: '80%',
-        marginBottom: 20,
+        width: '100%',
     },
     timeContainer: {
         flexDirection: 'row',

@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { FlatList, TouchableOpacity, Text, View, StyleSheet } from 'react-native';
 import { AudioPlayerProvider } from "../context/audio-player-context";
-import { AudioPlayerControls } from "../components/audioControls";
+import { AudioPlayerControls } from "../components/audioControlsFullPage";
 import { Playlist } from "../components/playList";
 import { useAudioPlayerContext } from '../context/audio-player-context';
 import { song } from '../constants/types';
