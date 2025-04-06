@@ -3,6 +3,9 @@ import { View, Text, TouchableOpacity, StyleSheet, Image } from 'react-native';
 import  Slider  from '@react-native-community/slider';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { Track, useAudioPlayerContext } from '../context/audio-player-context';
+import { Ionicons } from '@expo/vector-icons';
+import AntDesign from '@expo/vector-icons/AntDesign';
+
 
 export default function NowPlayingScreen() {
   //get current playing track data for display
@@ -20,6 +23,13 @@ export default function NowPlayingScreen() {
 
   return (
     <View style={styles.container}>
+      
+      <View style={styles.header}>
+  <TouchableOpacity onPress={() => router.push('/homePage')}>
+    <AntDesign name="home" size={28} color="#000" />
+  </TouchableOpacity>
+</View>
+
       {/* Album Art Placeholder */}
       <Image
         source={{ uri: currentTrack?.thumbnail || 'https://via.placeholder.com/300' }}
@@ -36,19 +46,20 @@ export default function NowPlayingScreen() {
       
       {/* Music Controls */}
       <View style={styles.controls}>
-        <TouchableOpacity>
-          <Text style={styles.controlIcon}>❤️</Text>
-        </TouchableOpacity>
-        <TouchableOpacity>
-          <Text style={styles.controlIcon}>⏮️</Text>
-        </TouchableOpacity>
-        <TouchableOpacity onPress={handlePlayPause}>
-          <Text style={styles.controlIcon}>{isPlaying ? '⏸️' : '▶️'}</Text>
-        </TouchableOpacity>
-        <TouchableOpacity>
-          <Text style={styles.controlIcon}>⏭️</Text>
-        </TouchableOpacity>
-      </View>
+  <TouchableOpacity>
+    <Ionicons name="heart-outline" size={32} color="#000" />
+  </TouchableOpacity>
+  <TouchableOpacity>
+    <Ionicons name="play-back" size={36} color="#000" />
+  </TouchableOpacity>
+  <TouchableOpacity onPress={handlePlayPause}>
+    <Ionicons name={isPlaying ? 'pause' : 'play'} size={48} color="#000" />
+  </TouchableOpacity>
+  <TouchableOpacity>
+    <Ionicons name="play-forward" size={36} color="#000" />
+  </TouchableOpacity>
+</View>
+
       
       {/* Volume Control */}
       <View style={styles.volumeControl}>
@@ -67,6 +78,13 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     padding: 16,
   },
+
+  header: {
+    position: 'absolute',
+    top: 40,
+    right: 20,
+    zIndex: 10,
+  },  
   albumArt: {
     width: 300,
     height: 300,

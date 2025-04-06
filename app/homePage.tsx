@@ -1,11 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet } from 'react-native';
-import { useEffect } from 'react';
-import { listFiles, getFileURL} from "../lib/supabase_crud";
+import { listFiles } from "../lib/supabase_crud";
 import { useRouter } from "expo-router";
 import { getUser } from "../lib/supabase_auth";
-import { AudioPlayerProvider } from "../context/audio-player-context";
-import { AudioPlayerControls } from "../components/audioControls";
+import { Ionicons } from '@expo/vector-icons'; // Importing Ionicons
 
 export default function HomeScreen() {
   const [user, setUser] = useState<string>("");
@@ -22,7 +20,6 @@ export default function HomeScreen() {
 
   useEffect(() => {
     fetchUser();
-
   }, []);
 
   const handlePlayPause = () => {
@@ -73,17 +70,16 @@ export default function HomeScreen() {
         <Text style={styles.nowPlayingText}>Now Playing</Text>
         <View style={styles.controls}>
           <TouchableOpacity>
-            <Text style={styles.controlIcon}>⏪</Text>
+            <Ionicons name="play-back" size={36} color="#000" /> {/* Previous Icon */}
           </TouchableOpacity>
           <TouchableOpacity onPress={handlePlayPause}>
-            <Text style={styles.controlIcon}>{isPlaying ? '⏸️' : '▶️'}</Text>
+            <Ionicons name={isPlaying ? 'pause' : 'play'} size={48} color="#000" /> {/* Play/Pause Icon */}
           </TouchableOpacity>
           <TouchableOpacity>
-            <Text style={styles.controlIcon}>⏩</Text>
+            <Ionicons name="play-forward" size={36} color="#000" /> {/* Next Icon */}
           </TouchableOpacity>
         </View>
       </TouchableOpacity>
-
     </View>
   );
 }
@@ -95,7 +91,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
     padding: 16,
-  },  
+  },
   searchBar: {
     backgroundColor: '#D6BCFA',
     width: '100%',
@@ -104,7 +100,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     padding: 12,
     borderRadius: 50,
-    marginBottom: 24,
+    marginTop: 24, // lowered slightly
   },
   icon: {
     color: '#000',
@@ -127,6 +123,7 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
     borderRadius: 12,
     marginBottom: 24,
+    marginTop: 12, // added spacing
   },
   tabItem: {
     alignItems: 'center',
@@ -171,14 +168,4 @@ const styles = StyleSheet.create({
     gap: 16,
     alignItems: 'center',
   },
-  controlIcon: {
-    color: '#000',
-    fontSize: 24,
-  },
-  button: {
-    backgroundColor: '#B794F4',
-    padding: 12,
-    borderRadius: 8,
-    marginTop: 16,
-  }
 });
