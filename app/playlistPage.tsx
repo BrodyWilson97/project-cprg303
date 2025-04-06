@@ -125,7 +125,7 @@ export default function PlaylistPage() {
           <Text style={styles.navIcon}>🏠</Text>
           <Text style={styles.navLabel}>Home</Text>
         </TouchableOpacity>
-        <TouchableOpacity onPress={() => router.push('/libraryPage')}>
+        <TouchableOpacity onPress={() => router.back()}>
           <Text style={styles.navIcon}>🎵</Text>
           <Text style={styles.navLabel}>Songs</Text>
         </TouchableOpacity>

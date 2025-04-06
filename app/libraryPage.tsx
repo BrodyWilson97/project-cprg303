@@ -65,24 +65,6 @@ export default function LibraryPage() {
     }, []);
 
 
-    const deleteSong = async (songId: string)=> {
-      await deleteFile(userID, songId);
-      fetchSongs(); // Refresh the song list after deletion
-    }
-    
-    const handleDelete = async (songId: string) => {
-
-        Alert.alert("Delete song", "Are you sure you want to delete this song?", [
-          {
-            text: "Cancel",
-            style: "cancel",
-          },
-          {
-            text: "OK",
-            onPress: () => deleteSong(songId),
-          },
-        ]);
-    };
 
   return (
     <View style={styles.container}>
@@ -122,33 +104,14 @@ export default function LibraryPage() {
         (loading ?
               (<Text>Loading...</Text>) :
               ( <Playlist fetchSongs={fetchSongs} userId={userID} /> )) 
-//   <ScrollView style={styles.songList}>
-//     {loading ? 
-//       (<Text>Loading...</Text>) :
-//             (songs.map((song, index) => (
-//               <TouchableOpacity key={index} style={styles.songItem}>
-//               <Image
-//                 source={{
-//                   uri: song.imageURL}}
-//                 style={{ width: 50, height: 50 }}
-//               />
-//                 <View style={{ width: "65%" }}>
-//                   <Text style={styles.songTitle}>{song.songName}</Text>
-//                   <Text style={styles.songArtist}>{song.artistName}</Text>
-//                 </View>
-//                 <TouchableOpacity onPress={() => handleDelete(song.id)}>
-//                   <Text style={{ fontSize: 20 }}>...</Text>
-//                 </TouchableOpacity>
-//               </TouchableOpacity>
-//       ))
-//     )}
-//   </ScrollView>
-// ) : (
+
+        // show names of all playlists
         :(loading ?
           (<Text>Loading...</Text>) :
           ( <ScrollView style={styles.playlistList}>
           {playlists.map((playlist, index) => (
-                <TouchableOpacity key={index} style={styles.playlistItem} onPress={() => router.push(`/viewPlaylistPage/?userID=${userID}&playlistID=${playlist.id}&playlistName=${playlist.playlistName}`)}>
+                <TouchableOpacity key={index} style={styles.playlistItem} 
+                                  onPress={() => router.push(`/viewPlaylistPage/?userID=${userID}&playlistID=${playlist.id}&playlistName=${playlist.playlistName}`)}>
               <Text style={styles.playlistName}>{playlist.playlistName}</Text>
             </TouchableOpacity>
           ))}
@@ -165,8 +128,6 @@ export default function LibraryPage() {
           <Text style={styles.buttonText}>Manage Playlists</Text>
         </TouchableOpacity>
       )}
-
-      <AudioPlayerControls />
 
       {/* Bottom Navigation */}
       <View style={styles.bottomNav}>
@@ -247,29 +208,6 @@ const styles = StyleSheet.create({
     backgroundColor: '#9F7AEA',
     borderRadius: 8,
     padding: 8,
-  },
-  songList: {
-    width: '100%',
-    maxWidth: 400,
-  },
-  songItem: {
-    backgroundColor: '#D6BCFA',
-    padding: 12,
-    marginBottom: 8,
-    borderRadius: 8,
-    flexDirection: 'row',
-    flex: 1,
-    columnGap: 20,
-  },
-  songTitle: {
-    fontSize: 16,
-    fontWeight: '500',
-    color: '#000',
-    paddingBottom: 4,
-  },
-  songArtist: {
-    fontSize: 14,
-    color: '#4A5568',
   },
   playlistList: {
     width: '100%',

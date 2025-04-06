@@ -6,7 +6,6 @@ import { useRouter } from "expo-router";
 import { getUser } from "../lib/supabase_auth";
 import { AudioPlayerProvider } from "../context/audio-player-context";
 import { AudioPlayerControls } from "../components/audioControls";
-import { Playlist } from "../components/playList";
 
 export default function HomeScreen() {
   const [user, setUser] = useState<string>("");
@@ -42,8 +41,6 @@ export default function HomeScreen() {
         <TextInput placeholder="Search" style={styles.searchInput} />
         <Text style={styles.icon}>🔍</Text>
       </View>
-
-      {/* Controls for testing */}
 
       {/* Tab Navigation */}
       <View style={styles.tabNavigation}>

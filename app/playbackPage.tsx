@@ -1,10 +1,19 @@
 import React, { useState } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, Image } from 'react-native';
 import  Slider  from '@react-native-community/slider';
+import { useRouter, useLocalSearchParams } from 'expo-router';
+import { Track, useAudioPlayerContext } from '../context/audio-player-context';
 
 export default function NowPlayingScreen() {
-  const [isPlaying, setIsPlaying] = useState(false);
+  //get current playing track data for display
+    const { 
+        currentTrack
+    } = useAudioPlayerContext();
 
+  const [isPlaying, setIsPlaying] = useState(false);
+  const router = useRouter();
+
+  //keep??
   const handlePlayPause = () => {
     setIsPlaying(!isPlaying);
   };
@@ -12,12 +21,14 @@ export default function NowPlayingScreen() {
   return (
     <View style={styles.container}>
       {/* Album Art Placeholder */}
-      <View style={styles.albumArt} />
+      <Image
+        source={{ uri: currentTrack?.thumbnail || 'https://via.placeholder.com/300' }}
+        style={styles.albumArt}/>
       
       {/* Song Info */}
       <View style={styles.songInfoContainer}>
-        <Text style={styles.songTitle}>Song Name</Text>
-        <Text style={styles.artistName}>Artist Name</Text>
+        <Text style={styles.songTitle}>{currentTrack?.title}</Text>
+        <Text style={styles.artistName}>{currentTrack?.artist}</Text>
       </View>
       
       {/* Progress Bar */}

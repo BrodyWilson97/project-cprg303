@@ -7,13 +7,10 @@ import { useAudioPlayerContext } from '../context/audio-player-context';
 import { song } from '../constants/types';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { getPlaylistSongs, getFileURL } from "../lib/supabase_crud";
-import { get } from 'react-native/Libraries/TurboModule/TurboModuleRegistry';
 
 export default function ViewPlaylistPage(){
     const { 
         setPlaylist, //sets playlist state in audioplayer context
-        playlist,
-        setCurrentTrack //sets current track state in audioplayer context
     } = useAudioPlayerContext();
 
     //fetch playlist as type songs from supabase then convert to tracks and set to audioplayer playlist state

@@ -2,6 +2,8 @@ import React from 'react';
 import { FlatList, TouchableOpacity, Text, View, Alert, Image, ScrollView, StyleSheet } from 'react-native';
 import { Track, useAudioPlayerContext } from '../context/audio-player-context';
 import { getFileURL, deleteFile, } from "../lib/supabase_crud";
+import { useRouter, useLocalSearchParams } from 'expo-router';
+
 interface PlaylistProps {
     fetchSongs?: (userId: string) => void; // Function parameter as a prop
     userId: string; 
@@ -11,9 +13,10 @@ interface PlaylistProps {
     const { 
         playlist,
         playTrack, 
-        currentTrack,
         setCurrentTrack, //sets current track state in audioplayer context 
     } = useAudioPlayerContext();
+    
+    const router = useRouter();
 
     const clickSong = async (item: Track) => {
         const url = await getFileURL("musicfiles", userId, item.id.toString(), 10000, "audio"); //fetch the file URL from supabase
@@ -21,6 +24,8 @@ interface PlaylistProps {
         setCurrentTrack(item); //set current track state in audioplayer context
 
         playTrack(item); //play the track
+        //go to playback page
+        router.push({ pathname: '/playbackPage' });
     }
 
     const deleteSong = async (userId: string, songId: string)=> {
