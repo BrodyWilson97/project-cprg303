@@ -75,13 +75,16 @@ export default function HomeScreen() {
         <Text style={styles.nowPlayingText}>Now Playing</Text>
         <View style={styles.controls}>
           <TouchableOpacity>
-            <Ionicons name="play-back" size={36} color="#000" /> {/* Previous Icon */}
+            <Ionicons name="play-back" size={36} color="#000" /> 
+            {/* Previous Icon */}
           </TouchableOpacity>
           <TouchableOpacity onPress={handlePlayPause}>
-            <Ionicons name={isPlaying ? 'pause' : 'play'} size={48} color="#000" /> {/* Play/Pause Icon */}
+            <Ionicons name={isPlaying ? 'pause' : 'play'} size={48} color="#000" /> 
+            {/* Play/Pause Icon */}
           </TouchableOpacity>
           <TouchableOpacity>
-            <Ionicons name="play-forward" size={36} color="#000" /> {/* Next Icon */}
+            <Ionicons name="play-forward" size={36} color="#000" /> 
+            {/* Next Icon */}
           </TouchableOpacity>
         </View>
       </TouchableOpacity>
