@@ -3,6 +3,12 @@ import { View, Text, TouchableOpacity, StyleSheet, Image } from 'react-native';
 import  Slider  from '@react-native-community/slider';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { Track, useAudioPlayerContext } from '../context/audio-player-context';
+import { NextTrack } from '../components/controlComponents/nextTrack';
+import { PrevTrack } from '../components/controlComponents/prevTrack';
+import { TogglePlayPause } from '../components/controlComponents/togglePlayPause';
+import { Shuffle } from '../components/controlComponents/shuffle';
+import { Repeat } from '../components/controlComponents/repeat';
+import { ProgressBar } from '../components/controlComponents/progressBar';
 import { Ionicons } from '@expo/vector-icons';
 import AntDesign from '@expo/vector-icons/AntDesign';
 
@@ -10,7 +16,13 @@ import AntDesign from '@expo/vector-icons/AntDesign';
 export default function NowPlayingScreen() {
   //get current playing track data for display
     const { 
-        currentTrack
+        currentTrack,
+        playTrack,
+        togglePlayPause,
+        playNextTrack,
+        playPreviousTrack,
+        seekToPosition,
+
     } = useAudioPlayerContext();
 
   const [isPlaying, setIsPlaying] = useState(false);
@@ -23,13 +35,6 @@ export default function NowPlayingScreen() {
 
   return (
     <View style={styles.container}>
-      
-      <View style={styles.header}>
-  <TouchableOpacity onPress={() => router.push('/homePage')}>
-    <AntDesign name="home" size={28} color="#000" />
-  </TouchableOpacity>
-</View>
-
       {/* Album Art Placeholder */}
       <Image
         source={{ uri: currentTrack?.thumbnail || 'https://via.placeholder.com/300' }}
@@ -42,10 +47,21 @@ export default function NowPlayingScreen() {
       </View>
       
       {/* Progress Bar */}
-      <Slider style={styles.progressBar} minimumValue={0} maximumValue={1} minimumTrackTintColor="#6B46C1" maximumTrackTintColor="#A3A3A3" thumbTintColor="#000"/>
-      
+      {/* <Slider style={styles.progressBar} minimumValue={0} maximumValue={1} minimumTrackTintColor="#6B46C1" maximumTrackTintColor="#A3A3A3" thumbTintColor="#000"/> */}
+      <ProgressBar/>
+
       {/* Music Controls */}
-      <View style={styles.controls}>
+        <PrevTrack/>
+
+        <TogglePlayPause/>
+
+        <NextTrack/>
+
+        <Shuffle/>
+
+        <Repeat/>
+
+      {/* <View style={styles.controls}>
   <TouchableOpacity>
     <Ionicons name="heart-outline" size={32} color="#000" />
   </TouchableOpacity>
@@ -58,10 +74,11 @@ export default function NowPlayingScreen() {
   <TouchableOpacity>
     <Ionicons name="play-forward" size={36} color="#000" />
   </TouchableOpacity>
-</View>
+</View> */}
 
       
       {/* Volume Control */}
+      {/*doesnt work yet*/}
       <View style={styles.volumeControl}>
         <Text style={styles.controlIcon}>🔊</Text>
         <Slider style={styles.volumeSlider} minimumValue={0} maximumValue={1} minimumTrackTintColor="#6B46C1" maximumTrackTintColor="#D1D5DB" thumbTintColor="#000"/>

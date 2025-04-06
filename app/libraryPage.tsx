@@ -42,6 +42,7 @@ export default function LibraryPage() {
       thumbnail: song.imageURL,
       uri: null,
     })));
+
     setLoading(false);
   };
 
