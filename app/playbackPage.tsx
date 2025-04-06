@@ -9,7 +9,6 @@ import { TogglePlayPause } from '../components/controlComponents/togglePlayPause
 import { Shuffle } from '../components/controlComponents/shuffle';
 import { Repeat } from '../components/controlComponents/repeat';
 import { ProgressBar } from '../components/controlComponents/progressBar';
-import AntDesign from '@expo/vector-icons/AntDesign';
 import { Ionicons } from '@expo/vector-icons';
 import AntDesign from '@expo/vector-icons/AntDesign';
 
