@@ -6,9 +6,23 @@ import * as DocumentPicker from 'expo-document-picker';
 import { decode } from 'base64-arraybuffer'
 import { useRouter } from "expo-router";
 import { getUser } from "../lib/supabase_auth";
+import { Ionicons } from '@expo/vector-icons'; // Importing Ionicons
+import { useAudioPlayerContext } from '../context/audio-player-context';
+
+import { NextTrack } from '../components/controlComponents/nextTrack';
+import { PrevTrack } from '../components/controlComponents/prevTrack';
+import { TogglePlayPause } from '../components/controlComponents/togglePlayPause';
+import { testTracks } from '../lib/testTracks';
+import { Shuffle } from '../components/controlComponents/shuffle';
+import { Repeat } from '../components/controlComponents/repeat';
+import { ProgressBar } from '../components/controlComponents/progressBar';
+import { AudioPlayerControlsFooter } from '../components/audioControlsFooter';
+
 
 export default function HomeScreen() {
-  // testing to access current user
+      const { 
+        setUserAudioPlayerContext, //sets current track state in audioplayer context
+      } = useAudioPlayerContext();
   const [user, setUser] = useState<string>("");
 
   const [isPlaying, setIsPlaying] = useState<boolean>(false);
@@ -17,7 +31,9 @@ export default function HomeScreen() {
   const fetchUser = async () => {
     const { user } = await getUser();
     if (user) {
-      setUser(user.email!);
+      setUser(user.id);
+      setUserAudioPlayerContext(user.id); //set userID in audio player context
+      await listFiles(user.id);
     }
     else if (!user) return;
   };
@@ -205,4 +221,3 @@ const styles = StyleSheet.create({
     marginTop: 16,
   }
 });
-
