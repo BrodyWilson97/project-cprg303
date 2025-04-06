@@ -3,6 +3,7 @@ import { signOut } from "../lib/supabase_auth";
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import AntDesign from '@expo/vector-icons/AntDesign';
 import { router } from 'expo-router';
+
 export default function SettingsPage() {
   const menuItems = ["Account", "Content and Display", "Privacy", "Storage", "Notifications", "About"];
 
@@ -13,10 +14,14 @@ export default function SettingsPage() {
 
   return (
     <View style={styles.container}>
-      <TouchableOpacity style={styles.header} onPress={() => router.push("/homePage")}>
-        <AntDesign name="home" size={24} color="black" />
-      </TouchableOpacity>
+      {/* Home Icon in Top Right */}
+      <View style={styles.topBar}>
+        <TouchableOpacity onPress={() => router.push("/homePage")}>
+          <AntDesign name="home" size={28} color="black" />
+        </TouchableOpacity>
+      </View>
 
+      {/* Settings Options */}
       <View style={styles.menu}>
         {menuItems.map((item, index) => (
           <View key={index} style={styles.menuItem}>
@@ -28,6 +33,7 @@ export default function SettingsPage() {
         ))}
       </View>
 
+      {/* Logout Button */}
       <TouchableOpacity style={styles.logoutButton} onPress={handleLogOut}>
         <Text style={styles.logoutButtonText}>Log Out</Text>
       </TouchableOpacity>
@@ -39,12 +45,12 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#E9D8FD',
-    padding: 24,
+    paddingHorizontal: 24,
+    paddingTop: 48,
   },
-  header: {
-    flexDirection: 'row',
-    justifyContent: 'flex-end',
-    alignItems: 'center',
+  topBar: {
+    width: '100%',
+    alignItems: 'flex-end',
     marginBottom: 24,
   },
   menu: {

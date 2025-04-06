@@ -1,81 +1,57 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView, Alert, Image } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView } from 'react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
-import AntDesign from '@expo/vector-icons/AntDesign';
-import { FileObject } from '@supabase/storage-js';
-import { getFileURL, listFiles, deleteFile, listPlaylists } from "../lib/supabase_crud";
-import { song, playlist } from "../constants/types";
+import { listFiles, listPlaylists } from "../lib/supabase_crud";
+import { playlist } from "../constants/types";
 import { useAudioPlayerContext } from '../context/audio-player-context';
-import { Playlist, } from '../components/playList';
-import { AudioPlayerControls } from "../components/audioControls";
+import { Playlist } from '../components/playList';
 
 export default function LibraryPage() {
   const { 
-      setPlaylist,   //playlist refers to all library songs here for audio player context
-      setCurrentTrack //sets current track state in audioplayer context
+    setPlaylist,   
+    setCurrentTrack 
   } = useAudioPlayerContext();
 
-  const [activeTab, setActiveTab] = useState<'songs' | 'playlists'>('songs'); // State to toggle tabs
+  const [activeTab, setActiveTab] = useState<'songs' | 'playlists'>('songs');
   const [playlists, setPlaylists] = useState<playlist[]>([]);
-  //songs usestate not needed since they are assigned in the audioplayer context
-
-  //const [selectedsong, setSelectedsong] = useState<FileObject | null>(null);
-  const[loading, setLoading] = useState<boolean>(false);
+  const [loading, setLoading] = useState<boolean>(false);
 
   const router = useRouter();
   const userID = useLocalSearchParams().userID as string;
 
-  //for playlists tabs display all playlist names
   const fetchPlaylists = async () => {
     setLoading(true);
-    // Fetch playlists from Supabase and set the state
     const data = await listPlaylists(userID);
-
-    if (!data) return; //leave page blank
-    //refers to all playlists not the audio player context playlist
+    if (!data) return;
     setPlaylists([...data]);
     setLoading(false);
-  }
+  };
 
   const fetchSongs = async () => {
     setLoading(true);
-
     if (!userID) return;
 
     const data = await listFiles(userID);
-
     if (!data) return;
 
-    //convert song type to track!!
-    //this playlist refers to all library songs here for audio player context
-    //they are mapped in the playlist component
     setPlaylist(data.map((song) => ({
       id: song.id,
       title: song.songName,
       artist: song.artistName,
       thumbnail: song.imageURL,
-      uri: null, //placeholder, will be assigned when item is clicked
+      uri: null,
     })));
 
     setLoading(false);
   };
 
-    useEffect(() => {
-      fetchSongs();
-      fetchPlaylists();
-    }, []);
-
-
+  useEffect(() => {
+    fetchSongs();
+    fetchPlaylists();
+  }, []);
 
   return (
     <View style={styles.container}>
-      {/* Header with Home Icon */}
-      <View style={styles.header}>
-        <TouchableOpacity onPress={() => router.push('/homePage')}>
-          <AntDesign name="home" size={24} color="black" />
-        </TouchableOpacity>
-      </View>
-
       {/* Search Bar */}
       <View style={styles.searchBar}>
         <Text style={styles.icon}>🔍</Text>
@@ -100,32 +76,30 @@ export default function LibraryPage() {
         </TouchableOpacity>
       </View>
 
-      {/* Conditional Rendering of Songs or Playlists */}
+      {/* Conditional Rendering */}
       {activeTab === 'songs' ? 
-        (loading ?
-              (<Text>Loading...</Text>) :
-              ( <Playlist fetchSongs={fetchSongs} userId={userID} /> )) 
-
-        // show names of all playlists
-        :(loading ?
-          (<Text>Loading...</Text>) :
-          ( <ScrollView style={styles.playlistList}>
-          {playlists.map((playlist, index) => (
-                <TouchableOpacity key={index} style={styles.playlistItem} 
-                                  onPress={() => router.push(`/viewPlaylistPage/?userID=${userID}&playlistID=${playlist.id}&playlistName=${playlist.playlistName}`)}>
-              <Text style={styles.playlistName}>{playlist.playlistName}</Text>
-            </TouchableOpacity>
-          ))}
-        </ScrollView>)
-      )}
-
+        (loading ? <Text>Loading...</Text> : <Playlist fetchSongs={fetchSongs} userId={userID} />) :
+        (loading ? <Text>Loading...</Text> :
+          <ScrollView style={styles.playlistList}>
+            {playlists.map((playlist, index) => (
+              <TouchableOpacity 
+                key={index} 
+                style={styles.playlistItem} 
+                onPress={() => router.push(`/viewPlaylistPage/?userID=${userID}&playlistID=${playlist.id}&playlistName=${playlist.playlistName}`)}
+              >
+                <Text style={styles.playlistName}>{playlist.playlistName}</Text>
+              </TouchableOpacity>
+            ))}
+          </ScrollView>
+        )
+      }
 
       {/* Manage Playlists Button */}
       {activeTab === 'playlists' && (
         <TouchableOpacity
           style={styles.manageButton}
-          onPress={() => router.push(`/playlistPage/?userID=${userID}`)}>
-        
+          onPress={() => router.push(`/playlistPage/?userID=${userID}`)}
+        >
           <Text style={styles.buttonText}>Manage Playlists</Text>
         </TouchableOpacity>
       )}
@@ -156,11 +130,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     padding: 16,
   },
-  header: {
-    width: '100%',
-    padding: 16,
-    alignItems: 'flex-start',
-  },
   searchBar: {
     backgroundColor: '#D6BCFA',
     width: '100%',
@@ -169,7 +138,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     padding: 12,
     borderRadius: 50,
-    marginBottom: 24,
+    marginTop: 16,
   },
   icon: {
     color: '#000',
@@ -191,6 +160,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-around',
     paddingVertical: 6,
     borderRadius: 12,
+    marginTop: 12,
     marginBottom: 16,
   },
   tabItem: {

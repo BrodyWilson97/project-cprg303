@@ -10,6 +10,9 @@ import { Shuffle } from '../components/controlComponents/shuffle';
 import { Repeat } from '../components/controlComponents/repeat';
 import { ProgressBar } from '../components/controlComponents/progressBar';
 import AntDesign from '@expo/vector-icons/AntDesign';
+import { Ionicons } from '@expo/vector-icons';
+import AntDesign from '@expo/vector-icons/AntDesign';
+
 
 export default function NowPlayingScreen() {
   //get current playing track data for display
@@ -33,10 +36,6 @@ export default function NowPlayingScreen() {
 
   return (
     <View style={styles.container}>
-      {/* Back Button */}
-      <TouchableOpacity onPress={() => router.push("/homePage")} style={{ position: 'absolute', top: 40, left: 20 }}>
-        <AntDesign name="arrowleft" size={24} color="black" />
-      </TouchableOpacity>
       {/* Album Art Placeholder */}
       <Image
         source={{ uri: currentTrack?.thumbnail || 'https://via.placeholder.com/300' }}
@@ -64,19 +63,20 @@ export default function NowPlayingScreen() {
         <Repeat/>
 
       {/* <View style={styles.controls}>
-        <TouchableOpacity>
-          <Text style={styles.controlIcon}>❤️</Text>
-        </TouchableOpacity>
-        <TouchableOpacity>
-          <Text style={styles.controlIcon}>⏮️</Text>
-        </TouchableOpacity>
-        <TouchableOpacity onPress={handlePlayPause}>
-          <Text style={styles.controlIcon}>{isPlaying ? '⏸️' : '▶️'}</Text>
-        </TouchableOpacity>
-        <TouchableOpacity>
-          <Text style={styles.controlIcon}>⏭️</Text>
-        </TouchableOpacity>
-      </View> */}
+  <TouchableOpacity>
+    <Ionicons name="heart-outline" size={32} color="#000" />
+  </TouchableOpacity>
+  <TouchableOpacity>
+    <Ionicons name="play-back" size={36} color="#000" />
+  </TouchableOpacity>
+  <TouchableOpacity onPress={handlePlayPause}>
+    <Ionicons name={isPlaying ? 'pause' : 'play'} size={48} color="#000" />
+  </TouchableOpacity>
+  <TouchableOpacity>
+    <Ionicons name="play-forward" size={36} color="#000" />
+  </TouchableOpacity>
+</View> */}
+
       
       {/* Volume Control */}
       {/*doesnt work yet*/}
@@ -96,6 +96,13 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     padding: 16,
   },
+
+  header: {
+    position: 'absolute',
+    top: 40,
+    right: 20,
+    zIndex: 10,
+  },  
   albumArt: {
     width: 300,
     height: 300,
