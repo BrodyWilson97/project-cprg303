@@ -56,6 +56,7 @@ export default function LibraryPage() {
       thumbnail: song.imageURL,
       uri: null, //placeholder, will be assigned when item is clicked
     })));
+
     setLoading(false);
   };
 

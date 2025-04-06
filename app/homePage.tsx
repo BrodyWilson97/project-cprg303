@@ -6,8 +6,12 @@ import { useRouter } from "expo-router";
 import { getUser } from "../lib/supabase_auth";
 import { AudioPlayerProvider } from "../context/audio-player-context";
 import { AudioPlayerControls } from "../components/audioControls";
+import { useAudioPlayerContext } from '../context/audio-player-context';
 
 export default function HomeScreen() {
+      const { 
+        setUserAudioPlayerContext, //sets current track state in audioplayer context
+      } = useAudioPlayerContext();
   const [user, setUser] = useState<string>("");
   const [isPlaying, setIsPlaying] = useState<boolean>(false);
   const router = useRouter();
@@ -16,6 +20,7 @@ export default function HomeScreen() {
     const { user } = await getUser();
     if (user) {
       setUser(user.id);
+      setUserAudioPlayerContext(user.id); //set userID in audio player context
       await listFiles(user.id);
     }
   };

@@ -12,6 +12,8 @@ import { Audio,
     AVPlaybackStatusSuccess 
 } from 'expo-av';
 import { testTracks } from '../lib/testTracks';
+import { getFileURL } from '../lib/supabase_crud';
+import { getUser } from "../lib/supabase_auth";
 
 // ======================== Type Definitions ========================
 export interface Track {
@@ -48,6 +50,8 @@ interface AudioPlayerContextType {
     // Playlist management
     setPlaylist: Dispatch<SetStateAction<Track[]>>;
     setCurrentTrack: Dispatch<SetStateAction<Track | null>>;
+
+    setUserAudioPlayerContext: Dispatch<SetStateAction<string>>; //userID from supabase auth, set on home page
 }
 
 // ======================== Context Setup ========================
@@ -66,7 +70,7 @@ export const AudioPlayerProvider = ({ children }: { children: ReactNode }) => {
     const [sliderValue, setSliderValue] = useState(0);
     // testTracks hard coded for testing
     const [playlist, setPlaylist] = useState<Track[]>([]);
-
+    const [userId, setUserAudioPlayerContext] = useState<string>(""); //userID from supabase auth, set on home page
 
     // Load and play a track
     const playTrack = async (track: Track) => {
@@ -75,6 +79,10 @@ export const AudioPlayerProvider = ({ children }: { children: ReactNode }) => {
             if (sound) {
                 await sound.unloadAsync();
             }
+
+            //get file URL from supabase
+            const url = await getFileURL("musicfiles", userId, track.id.toString(), 10000, "audio"); //fetch the file URL from supabase
+            track.uri = url; //set the uri of the track to the file URL
 
             // Load new sound
             if (track.uri === null) {
@@ -226,7 +234,8 @@ export const AudioPlayerProvider = ({ children }: { children: ReactNode }) => {
         repeat,
         shuffle,
         handleSlidingComplete,
-        handleSliderValueChange,    
+        handleSliderValueChange, 
+        setUserAudioPlayerContext,   
     };
 
     return (
