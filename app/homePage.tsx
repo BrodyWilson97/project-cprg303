@@ -4,6 +4,7 @@ import { listFiles } from "../lib/supabase_crud";
 import { useRouter } from "expo-router";
 import { getUser } from "../lib/supabase_auth";
 import { Ionicons } from '@expo/vector-icons'; // Importing Ionicons
+import { useAudioPlayerContext } from '../context/audio-player-context';
 
 import { NextTrack } from '../components/controlComponents/nextTrack';
 import { PrevTrack } from '../components/controlComponents/prevTrack';
@@ -16,6 +17,9 @@ import { AudioPlayerControlsFooter } from '../components/audioControlsFooter';
 
 
 export default function HomeScreen() {
+      const { 
+        setUserAudioPlayerContext, //sets current track state in audioplayer context
+      } = useAudioPlayerContext();
   const [user, setUser] = useState<string>("");
   const [isPlaying, setIsPlaying] = useState<boolean>(false);
   const router = useRouter();
@@ -24,6 +28,7 @@ export default function HomeScreen() {
     const { user } = await getUser();
     if (user) {
       setUser(user.id);
+      setUserAudioPlayerContext(user.id); //set userID in audio player context
       await listFiles(user.id);
     }
   };
