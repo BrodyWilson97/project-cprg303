@@ -116,3 +116,80 @@ export async function deleteFile(userId: string, fileId: string){
     }
 }
 
+//add playlist name to table then use the id to add id to the corresponding songs in songData table
+export async function uploadPlaylist(userId: string, playlistName: string, songs: song[]){
+
+    const { data, error } = await supabase
+    .from('playlists')
+    .insert([
+        { playlistName: playlistName, userId: userId} 
+    ])
+    .select("id")
+
+    if (error) {
+        console.error('Error creating playlist:', error);
+        return null;
+    }
+
+    //array of song ids to be added to the playlist
+    const songIds = songs.map((song) => song.id);
+
+    //add to songdata
+    const { error: songError } = await supabase
+    .from('songData')
+    .update({ playlistId: data[0].id })
+    .eq('userId', userId) 
+    .in('id', songIds); //where each song id = the song id column and user id = user id in the RLS policy
+
+    if (songError) {
+        console.error('Error adding songs to playlist:', songError);
+        return null;
+    }
+    console.log("playlist songs added");
+    return data[0].id;
+}
+
+export async function listPlaylists(userId: string) {
+    const { data, error } = await supabase
+        .from('playlists')
+        .select('*')
+        .eq('userId', userId);
+
+    if (error) {
+        console.error('Error fetching playlists:', error);
+        return null;
+    }
+
+    return data;
+}
+
+export async function deletePlaylist(playlistId: string) {
+    // Delete the playlist from the database
+    const { error } = await supabase
+        .from('playlists')
+        .delete()
+        .eq('id', playlistId);
+
+    if (error) {
+        console.error('Error deleting playlist:', error);
+        return null;
+    }
+
+    console.log('Playlist deleted successfully:', playlistId);
+    return true;
+}
+
+export async function editPlaylist(playlistId: string, newPlaylistName: string) {
+    // Update the playlist name in the database
+    const { error } = await supabase
+        .from('playlists')
+        .update({ playlistName: newPlaylistName })
+        .eq('id', playlistId);
+
+    if (error) {
+        console.error('Error updating playlist:', error);
+        return null;
+    }
+
+    return true;
+}

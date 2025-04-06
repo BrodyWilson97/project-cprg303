@@ -1,64 +1,89 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView, Alert } from 'react-native';
-import { useRouter } from 'expo-router';
+import { useRouter, useLocalSearchParams } from 'expo-router';
+import AddSongsPopUp from './addSongsPopUp'; 
+import { song } from '../constants/types'; 
+import { uploadPlaylist, listPlaylists, deletePlaylist, editPlaylist } from '../lib/supabase_crud';
+import { playlist } from '../constants/types'; 
 
 export default function PlaylistPage() {
   const router = useRouter();
+  const userID = useLocalSearchParams().userID as string;
 
-  const [playlists, setPlaylists] = useState([
-    { name: 'Playlist 1' },
-    { name: 'Playlist 2' },
-    { name: 'Playlist 3' },
-  ]); // Sample playlists
+  const [playlists, setPlaylists] = useState<playlist[]>([]);
   const [newPlaylistName, setNewPlaylistName] = useState('');
   const [editingPlaylist, setEditingPlaylist] = useState<number | null>(null);
+  const [showAddSongsPopup, setShowAddSongsPopup] = useState(false); // State for popup visibility
 
-  const createPlaylist = () => {
+  const fetchPlaylists = async () => {
+    // Fetch playlists from Supabase and set the state
+    const data = await listPlaylists(userID);
+
+    if (!data) return; //leave page blank
+    setPlaylists([...data]);
+  }
+
+  useEffect(() => {
+    fetchPlaylists();
+  }, []);
+
+
+  //get playlist name then show a list of library songs to select and add in a pop up
+  //the create playlist button first shows the popup and when the popup is submitted, create playlist is called
+  //to submit the selected songs and playlist name to supabase
+  const createPlaylist = async (selectedSongs : song[]) => {
     if (!newPlaylistName.trim()) {
       Alert.alert('Error', "Playlist name can't be empty!");
       return;
     }
 
-    setPlaylists([...playlists, { name: newPlaylistName.trim() }]);
+    //add playlist to supabase
+    const playlistId = await uploadPlaylist(userID, newPlaylistName.trim(), selectedSongs);
+
+    //add playlist name to state and reset the input field
+    setPlaylists([...playlists, {id: playlistId,  playlistName: newPlaylistName.trim() }]);
     setNewPlaylistName('');
-    Alert.alert('Success', 'Playlist created!');
   };
 
-  const deletePlaylist = (index: number) => {
-    const updatedPlaylists = playlists.filter((_, i) => i !== index);
-    setPlaylists(updatedPlaylists);
-    Alert.alert('Success', 'Playlist deleted!');
+  const removePlaylist = async (id: string) => {
+    await deletePlaylist(id); 
+    fetchPlaylists(); // Refresh the playlist list after deletion
   };
 
   const startEditingPlaylist = (index: number) => {
     setEditingPlaylist(index);
-    setNewPlaylistName(playlists[index].name);
+    setNewPlaylistName(playlists[index].playlistName);
   };
 
-  const savePlaylistChanges = () => {
+  //update the playlist name in supabase and state
+  const savePlaylistChanges = async () => {
     if (!newPlaylistName.trim()) {
       Alert.alert('Error', "Playlist name can't be empty!");
       return;
     }
 
-    const updatedPlaylists = playlists.map((playlist, index) =>
-      index === editingPlaylist ? { name: newPlaylistName.trim() } : playlist
-    );
-    setPlaylists(updatedPlaylists);
+    await editPlaylist(playlists[editingPlaylist!].id, newPlaylistName.trim());
+    fetchPlaylists(); // Refresh the playlist list after editing
     setEditingPlaylist(null);
     setNewPlaylistName('');
-    Alert.alert('Success', 'Playlist updated!');
   };
 
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Manage Playlists</Text>
-
+      {/* Add Songs Popup */}
+      {showAddSongsPopup && (
+        <AddSongsPopUp
+          userID={userID} // Replace with actual userID
+          onClose={() => setShowAddSongsPopup(false)}
+          onAddSongs={createPlaylist}
+        />)}
+      
       {/* Playlist List */}
       <ScrollView style={styles.playlistList}>
         {playlists.map((playlist, index) => (
           <View key={index} style={styles.playlistItem}>
-            <Text style={styles.playlistName}>{playlist.name}</Text>
+            <Text style={styles.playlistName}>{playlist.playlistName}</Text>
             <View style={styles.playlistActions}>
               <TouchableOpacity
                 style={styles.editButton}
@@ -68,7 +93,7 @@ export default function PlaylistPage() {
               </TouchableOpacity>
               <TouchableOpacity
                 style={styles.deleteButton}
-                onPress={() => deletePlaylist(index)}
+                onPress={() => removePlaylist(playlist.id)}
               >
                 <Text style={styles.buttonText}>Delete</Text>
               </TouchableOpacity>
@@ -89,7 +114,7 @@ export default function PlaylistPage() {
           <Text style={styles.buttonText}>Save Changes</Text>
         </TouchableOpacity>
       ) : (
-        <TouchableOpacity style={styles.button} onPress={createPlaylist}>
+        <TouchableOpacity style={styles.button} onPress={()=>setShowAddSongsPopup(true)}>
           <Text style={styles.buttonText}>Create Playlist</Text>
         </TouchableOpacity>
       )}

@@ -5,13 +5,17 @@ type uploadProps = {
   };
   
   type song = {
-    name: string;
     id: string;
     artistName: string;
     songName: string;
     //musicURL: string;
     imageURL: string; // imageURL can be null
   };
+
+  type playlist = {
+    id: string;
+    playlistName: string;
+  };
   
 
-  export {uploadProps, song};
+  export {uploadProps, song, playlist};

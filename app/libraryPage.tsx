@@ -3,16 +3,12 @@ import { View, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView, Alert,
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import AntDesign from '@expo/vector-icons/AntDesign';
 import { FileObject } from '@supabase/storage-js';
-import { getFileURL, listFiles, uploadFile, deleteFile } from "../lib/supabase_crud";
-import { song } from "../constants/types";
+import { getFileURL, listFiles, deleteFile, listPlaylists } from "../lib/supabase_crud";
+import { song, playlist } from "../constants/types";
 
 export default function LibraryPage() {
   const [activeTab, setActiveTab] = useState<'songs' | 'playlists'>('songs'); // State to toggle tabs
-  const [playlists, setPlaylists] = useState([
-    { name: 'Playlist 1' },
-    { name: 'Playlist 2' },
-    { name: 'Playlist 3' },
-  ]); // Sample playlists
+  const [playlists, setPlaylists] = useState<playlist[]>([]);
 
     const [songs, setSongs] = useState<song[]>([]);
     const [selectedsong, setSelectedsong] = useState<FileObject | null>(null);
@@ -21,6 +17,13 @@ export default function LibraryPage() {
     const router = useRouter();
     const userID = useLocalSearchParams().userID as string;
 
+    const fetchPlaylists = async () => {
+      // Fetch playlists from Supabase and set the state
+      const data = await listPlaylists(userID);
+  
+      if (!data) return; //leave page blank
+      setPlaylists([...data]);
+    }
 
     const fetchsongs = async () => {
       setLoading(true);
@@ -37,8 +40,8 @@ export default function LibraryPage() {
 
     useEffect(() => {
       fetchsongs();
-
-    }, [userID]);
+      fetchPlaylists();
+    }, []);
 
     const addSong = async (song: song) => {
       fetchsongs();
@@ -122,7 +125,7 @@ export default function LibraryPage() {
   <ScrollView style={styles.playlistList}>
     {playlists.map((playlist, index) => (
       <View key={index} style={styles.playlistItem}>
-        <Text style={styles.playlistName}>{playlist.name}</Text>
+        <Text style={styles.playlistName}>{playlist.playlistName}</Text>
       </View>
     ))}
   </ScrollView>
@@ -133,19 +136,19 @@ export default function LibraryPage() {
       {activeTab === 'playlists' && (
         <TouchableOpacity
           style={styles.manageButton}
-          onPress={() => router.push('/playlistPage')}
-        >
+          onPress={() => router.push(`/playlistPage/?userID=${userID}`)}>
+        
           <Text style={styles.buttonText}>Manage Playlists</Text>
         </TouchableOpacity>
       )}
 
       {/* Bottom Navigation */}
       <View style={styles.bottomNav}>
-        <TouchableOpacity onPress={() => router.push('/homePage')}>
+        <TouchableOpacity onPress={() => router.back()}>
           <Text style={styles.navIcon}>🏠</Text>
           <Text style={styles.navLabel}>Home</Text>
         </TouchableOpacity>
-        <TouchableOpacity onPress={() => router.navigate(`/filesPage/?userID=${userID}`)}>
+        <TouchableOpacity onPress={() => router.push(`/filesPage/?userID=${userID}`)}>
           <Text style={styles.navIcon}>📂</Text>
           <Text style={styles.navLabel}>Upload Files</Text>
         </TouchableOpacity>
