@@ -13,7 +13,7 @@ export default function SettingsPage() {
 
   return (
     <View style={styles.container}>
-      <TouchableOpacity style={styles.header} onPress={() => router.push("/home")}>
+      <TouchableOpacity style={styles.header} onPress={() => router.push("/homePage")}>
         <AntDesign name="home" size={24} color="black" />
       </TouchableOpacity>
 
