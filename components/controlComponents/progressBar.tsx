@@ -19,7 +19,7 @@ export const ProgressBar = () => {
     };
 
     return (
-        <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
+        <View style={{flex: 1, alignItems: 'center', justifyContent: 'center', width: '100%'}}>
             <Slider 
                 style={styles.progressBar} 
                 minimumValue={0} 

@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { listFiles, listPlaylists } from "../lib/supabase_crud";
 import { playlist } from "../constants/types";
 import { useAudioPlayerContext } from '../context/audio-player-context';
 import { Playlist } from '../components/playList';
 import { AudioPlayerControlsFooter } from '../components/audioControlsFooter';
+import FooterBar from '../components/footerBar';
 
 export default function LibraryPage() {
   const { 
@@ -55,7 +57,7 @@ export default function LibraryPage() {
     <View style={styles.container}>
       {/* Search Bar */}
       <View style={styles.searchBar}>
-        <Text style={styles.icon}>🔍</Text>
+        <Ionicons name="search-outline" size={30} color="#000" style={styles.icon}/>
         <TextInput placeholder="Search music..." style={styles.searchInput} />
       </View>
 
@@ -65,14 +67,14 @@ export default function LibraryPage() {
           style={[styles.tabItem, activeTab === 'songs' && styles.activeTab]}
           onPress={() => setActiveTab('songs')}
         >
-          <Text style={styles.tabIcon}>🎵</Text>
+          <Ionicons name="musical-notes-outline" size={30} color="#000" style={styles.icon}/>
           <Text style={styles.tabLabel}>Songs</Text>
         </TouchableOpacity>
         <TouchableOpacity
           style={[styles.tabItem, activeTab === 'playlists' && styles.activeTab]}
           onPress={() => setActiveTab('playlists')}
         >
-          <Text style={styles.tabIcon}>📂</Text>
+          <Ionicons name="folder-outline" size={30} color="#000" style={styles.icon}/>
           <Text style={styles.tabLabel}>Playlists</Text>
         </TouchableOpacity>
       </View>
@@ -81,7 +83,12 @@ export default function LibraryPage() {
       {activeTab === 'songs' ? 
         (loading ? <Text>Loading...</Text> : <Playlist fetchSongs={fetchSongs} userId={userID} />) :
         (loading ? <Text>Loading...</Text> :
-          <ScrollView style={styles.playlistList}>
+          <ScrollView 
+            style={styles.playlistList}
+            contentContainerStyle={{ 
+              paddingBottom: 100,
+              paddingTop: 20,}}
+          >
             {playlists.map((playlist, index) => (
               <TouchableOpacity 
                 key={index} 
@@ -108,22 +115,6 @@ export default function LibraryPage() {
         {/* Now Playing Section */}
       <AudioPlayerControlsFooter/>
       {/* Bottom Navigation */}
-      <View style={styles.bottomNav}>
-        <TouchableOpacity onPress={() => router.back()}>
-          <Text style={styles.navIcon}>🏠</Text>
-          <Text style={styles.navLabel}>Home</Text>
-        </TouchableOpacity>
-        <TouchableOpacity onPress={() => router.push(`/filesPage/?userID=${userID}`)}>
-          <Text style={styles.navIcon}>📂</Text>
-          <Text style={styles.navLabel}>Upload Files</Text>
-        </TouchableOpacity>
-        <TouchableOpacity onPress={() => router.push('/settingsPage')}>
-          <Text style={styles.navIcon}>⚙️</Text>
-          <Text style={styles.navLabel}>Settings</Text>
-        </TouchableOpacity>
-        
-        
-      </View>
     </View>
   );
 }
@@ -133,7 +124,8 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#E9D8FD',
     alignItems: 'center',
-    padding: 16,
+    justifyContent: 'flex-start',
+    // padding: 16,
   },
   searchBar: {
     backgroundColor: '#D6BCFA',
@@ -143,7 +135,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     padding: 12,
     borderRadius: 50,
-    marginTop: 16,
+    marginTop: 50, // lowered even more
   },
   icon: {
     color: '#000',
@@ -187,6 +179,7 @@ const styles = StyleSheet.create({
   },
   playlistList: {
     width: '100%',
+    flex: 1,
     maxWidth: 400,
     marginTop: 20,
   },

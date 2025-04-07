@@ -28,12 +28,6 @@ export default function App() {
   return (
       <View style={styles.container}>
 
-        {/* Controls for testing */}
-        <View style={styles.container}>
-          <AudioPlayerControlsFooter/>
-          {/* <Playlist/> */}
-        </View>
-
         <Text style={styles.title}>Harmoniq</Text>
         <View style={styles.form}>
           <View style={styles.inputGroup}>

@@ -21,10 +21,12 @@ export const PrevTrack = ({ style }: { style?: StyleProp<any> }) => {
         };
 
     return (
-            <TouchableOpacity 
-                
-                onPress={handleOnClick}>
-                <Ionicons name="play-back" size={30} color="#000" /> {/* Previous Icon */}
+            <TouchableOpacity               
+                onPress={(e) => {
+                    e.stopPropagation();
+                    handleOnClick()}}
+            >
+                <Ionicons name="play-back" size={30} color="#000" />
             </TouchableOpacity>
     );
 };

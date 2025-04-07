@@ -23,7 +23,10 @@ export const TogglePlayPause = ({ style }: { style?: StyleProp<any> }) => {
 
     return (
         <TouchableOpacity
-            onPress={handleOnClick}>
+        onPress={(e) => {
+            e.stopPropagation();
+            handleOnClick()}}
+        >
             <Ionicons name={isPlaying ? 'pause' : 'play'} size={48} color="#000" />
         </TouchableOpacity>
     )

@@ -18,15 +18,18 @@ export const Repeat = () => {
     return (
         <TouchableOpacity 
             style={{ 
-                borderWidth: isRepeat ? 1 : 0,
+                borderWidth: 1,
+                borderColor: isRepeat ? "#000" : "transparent",
                 borderRadius: 5, 
                 }}
-            onPress={handleOnClick}
+                onPress={(e) => {
+                    e.stopPropagation();
+                    handleOnClick()}}
         >
             <Ionicons name="repeat-outline" 
                 color="#000" 
                 size={20} 
-                padding={2}
+                style={{ padding: 2}}
             />
         </TouchableOpacity>
     );

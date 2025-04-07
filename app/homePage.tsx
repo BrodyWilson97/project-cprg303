@@ -49,9 +49,9 @@ export default function HomeScreen() {
     <View style={styles.container}>
       {/* Search Bar */}
       <View style={styles.searchBar}>
-        <Text style={styles.icon}>☰</Text>
+        <Ionicons name="menu-outline" size={30} color="#000" style={styles.icon}/>
         <TextInput placeholder="Search" style={styles.searchInput} />
-        <Text style={styles.icon}>🔍</Text>
+        <Ionicons name="search-outline" size={26} color="#000" style={styles.icon}/>
       </View>
 
       
@@ -67,39 +67,8 @@ export default function HomeScreen() {
       </View>
 
       {/* Now Playing Section */}
-
-      <AudioPlayerControlsFooter/>
       {/* Tab Navigation */}
-      <View style={styles.bottomNav}>
-        <TouchableOpacity style={styles.tabItem} onPress={() => router.push(`/libraryPage/?userID=${user}`)}>
-          <Text style={styles.tabIcon}>🎵</Text>
-          <Text style={styles.tabLabel}>Library</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.tabItem} onPress={() => router.push(`/filesPage/?userID=${user}`)}>
-          <Text style={styles.tabIcon}>📂</Text>
-          <Text style={styles.tabLabel}>Upload Files</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.tabItem} onPress={() => router.push("/settingsPage")}>
-          <Text style={styles.tabIcon}>⚙️</Text>
-          <Text style={styles.tabLabel}>Settings</Text>
-        </TouchableOpacity>
-      </View>
-      
-
-      {/* <TouchableOpacity style={styles.nowPlaying} onPress={openPlaybackPage}>
-        <Text style={styles.nowPlayingText}>Now Playing</Text>
-        <View style={styles.controls}>
-          <TouchableOpacity>
-            <Ionicons name="play-back" size={36} color="#000" /> 
-          </TouchableOpacity>
-          <TouchableOpacity onPress={handlePlayPause}>
-            <Ionicons name={isPlaying ? 'pause' : 'play'} size={48} color="#000" />
-          </TouchableOpacity>
-          <TouchableOpacity>
-            <Ionicons name="play-forward" size={36} color="#000" /> 
-          </TouchableOpacity>
-        </View>
-      </TouchableOpacity> */}
+      <AudioPlayerControlsFooter/>
     </View>
   );
 }
@@ -109,8 +78,7 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#E9D8FD',
     alignItems: 'center',
-    justifyContent: 'space-between',
-    padding: 16,
+    justifyContent: 'flex-start',
   },
   searchBar: {
     backgroundColor: '#D6BCFA',
@@ -120,7 +88,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     padding: 12,
     borderRadius: 50,
-    marginTop: 24, // lowered slightly
+    marginTop: 50, // lowered even more
   },
   icon: {
     color: '#000',

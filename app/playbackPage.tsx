@@ -3,14 +3,10 @@ import { View, Text, TouchableOpacity, StyleSheet, Image } from 'react-native';
 import  Slider  from '@react-native-community/slider';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { Track, useAudioPlayerContext } from '../context/audio-player-context';
-import { NextTrack } from '../components/controlComponents/nextTrack';
-import { PrevTrack } from '../components/controlComponents/prevTrack';
-import { TogglePlayPause } from '../components/controlComponents/togglePlayPause';
-import { Shuffle } from '../components/controlComponents/shuffle';
-import { Repeat } from '../components/controlComponents/repeat';
-import { ProgressBar } from '../components/controlComponents/progressBar';
 import { Ionicons } from '@expo/vector-icons';
 import AntDesign from '@expo/vector-icons/AntDesign';
+import { AudioPlayerControlsPage } from '../components/audioControlsPage';
+import FooterBar from '../components/footerBar';
 
 
 export default function NowPlayingScreen() {
@@ -18,23 +14,27 @@ export default function NowPlayingScreen() {
     const { 
         currentTrack,
         playTrack,
-        togglePlayPause,
-        playNextTrack,
-        playPreviousTrack,
-        seekToPosition,
-
     } = useAudioPlayerContext();
 
   const [isPlaying, setIsPlaying] = useState(false);
   const router = useRouter();
 
-  //keep??
-  const handlePlayPause = () => {
-    setIsPlaying(!isPlaying);
-  };
-
   return (
     <View style={styles.container}>
+      {/* Header */}
+      <View style={styles.header}>
+        <TouchableOpacity onPress={() => router.back()}>
+          <Ionicons name="arrow-back" size={30} color="#000" />
+        </TouchableOpacity>
+        {/* <TouchableOpacity onPress={() => router.push('/playlist')}>
+          <AntDesign name="heart" size={30} color="#000" />
+        </TouchableOpacity> */}
+        <TouchableOpacity onPress={() => router.push('/homePage')}>
+          <Ionicons name="home-outline" size={30} color="#000" />
+        </TouchableOpacity>
+      </View>
+
+
       {/* Album Art Placeholder */}
       <Image
         source={{ uri: currentTrack?.thumbnail || 'https://via.placeholder.com/300' }}
@@ -45,43 +45,18 @@ export default function NowPlayingScreen() {
         <Text style={styles.songTitle}>{currentTrack?.title}</Text>
         <Text style={styles.artistName}>{currentTrack?.artist}</Text>
       </View>
-      
-      {/* Progress Bar */}
-      {/* <Slider style={styles.progressBar} minimumValue={0} maximumValue={1} minimumTrackTintColor="#6B46C1" maximumTrackTintColor="#A3A3A3" thumbTintColor="#000"/> */}
-      <ProgressBar/>
 
       {/* Music Controls */}
-        <PrevTrack/>
-
-        <TogglePlayPause/>
-
-        <NextTrack/>
-
-        <Shuffle/>
-
-        <Repeat/>
-
-      {/* <View style={styles.controls}>
-  <TouchableOpacity>
-    <Ionicons name="heart-outline" size={32} color="#000" />
-  </TouchableOpacity>
-  <TouchableOpacity>
-    <Ionicons name="play-back" size={36} color="#000" />
-  </TouchableOpacity>
-  <TouchableOpacity onPress={handlePlayPause}>
-    <Ionicons name={isPlaying ? 'pause' : 'play'} size={48} color="#000" />
-  </TouchableOpacity>
-  <TouchableOpacity>
-    <Ionicons name="play-forward" size={36} color="#000" />
-  </TouchableOpacity>
-</View> */}
-
-      
+      <AudioPlayerControlsPage/>
+   
       {/* Volume Control */}
       {/*doesnt work yet*/}
-      <View style={styles.volumeControl}>
+      {/* <View style={styles.volumeControl}>
         <Text style={styles.controlIcon}>🔊</Text>
         <Slider style={styles.volumeSlider} minimumValue={0} maximumValue={1} minimumTrackTintColor="#6B46C1" maximumTrackTintColor="#D1D5DB" thumbTintColor="#000"/>
+      </View> */}
+      <View style={styles.jankyFooter}>
+        <FooterBar/>
       </View>
     </View>
   );
@@ -93,14 +68,16 @@ const styles = StyleSheet.create({
     backgroundColor: '#F3E8FF',
     alignItems: 'center',
     justifyContent: 'center',
-    padding: 16,
+    flexDirection: 'column',
   },
-
   header: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    width: '100%',
     position: 'absolute',
-    top: 40,
-    right: 20,
-    zIndex: 10,
+    top: 60,
+    paddingHorizontal: 15,
   },  
   albumArt: {
     width: 300,
@@ -145,5 +122,11 @@ const styles = StyleSheet.create({
   volumeSlider: {
     flex: 1,
     marginLeft: 10,
+  },
+  jankyFooter: {
+    position: 'absolute',
+    bottom: 0,
+    width: '100%',
+    backgroundColor: '#F3E8FF',
   },
 });

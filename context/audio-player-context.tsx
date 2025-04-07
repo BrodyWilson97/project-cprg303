@@ -14,7 +14,6 @@ import { Audio,
     AVPlaybackStatusError, 
     AVPlaybackStatusSuccess 
 } from 'expo-av';
-import { testTracks } from '../lib/testTracks';
 import { getFileURL } from '../lib/supabase_crud';
 import { getUser } from "../lib/supabase_auth";
 
@@ -65,8 +64,7 @@ export const AudioPlayerProvider = ({ children }: { children: ReactNode }) => {
     const [sound, setSound] = useState<Audio.Sound | null>(null);
     const [isPlaying, setIsPlaying] = useState(false);
     // hardcoded for testing
-    // const [currentTrack, setCurrentTrack] = useState<Track | null>(null);
-    const [currentTrack, setCurrentTrack] = useState<Track | null>(testTracks[0]);
+    const [currentTrack, setCurrentTrack] = useState<Track | null>(null);
     const [duration, setDuration] = useState(0);
     const [position, setPosition] = useState(0);
     const [isRepeat, setIsRepeat] = useState(false);

@@ -9,6 +9,7 @@ import { Shuffle } from './controlComponents/shuffle';
 import { Repeat } from './controlComponents/repeat';
 import { ProgressBar } from './controlComponents/progressBar';
 import { useRouter } from "expo-router";
+import FooterBar from './footerBar';
 
 
  export const AudioPlayerControlsFooter = () => {
@@ -18,19 +19,14 @@ import { useRouter } from "expo-router";
   } = useAudioPlayerContext();
     const router = useRouter();
 
-  // Hard coded Testing code
-  const handleOnPlay = async () => {
-      playTrack(testTracks[0]);
-  };
-  // End testing code
-
   const onPressFooterBar = async () => {
     router.push("/playbackPage");
   };
 
   return (
+    <View style={styles.container}>
       <TouchableOpacity 
-        style={styles.footerContainer}
+        style={styles.audioBarContainer}
         onPress={onPressFooterBar}
         activeOpacity={0.9}
       >
@@ -47,23 +43,29 @@ import { useRouter } from "expo-router";
         
         <ProgressBar/>
       </TouchableOpacity>
+      <FooterBar/>
+    </View>
+
   );
 };
 
 const styles = StyleSheet.create({
-  footerContainer: {
+  container: {
+    width: '100%',
     position: 'absolute',
-    bottom: 90,
-    left: 16,
-    right: 16,
+    bottom: 0,
+    zIndex: 10,
+    backgroundColor: 'transparent',
+    // flex: 1,
+    // flexDirection: 'column',
+    justifyContent: 'center',
+  },
+  audioBarContainer: {
     backgroundColor: '#B794F4',
     borderRadius: 12,
+    width: '95%',
     padding: 12,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 4,
+    margin: 10,
   },
 
   topRow: {

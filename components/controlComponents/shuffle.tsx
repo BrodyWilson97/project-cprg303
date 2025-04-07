@@ -11,23 +11,26 @@ export const Shuffle = () => {
         shuffle,
     } = useAudioPlayerContext();
     
-        const handleOnClick = () => {
-            shuffle();
-        };
+    const handleOnClick = () => {
+        shuffle();
+    };
     
     return (
         <TouchableOpacity 
-            style={{ 
-                borderWidth: isShuffle ? 1 : 0,
-                borderRadius: 5, 
+        style={{ 
+            borderWidth: 1,
+            borderColor: isShuffle ? "#000" : "transparent",
+            borderRadius: 5, 
             }}
-            onPress={handleOnClick}
+            onPress={(e) => {
+                e.stopPropagation();
+                handleOnClick()}}
         >
             <Ionicons name="shuffle-outline" 
                 color="#000"  
-                size={26} 
-                padding={2}
-            /> {/* Shuffle Icon */}
+                size={20} 
+                style={{ padding: 2}}
+            />
         </TouchableOpacity>
     );
 };
