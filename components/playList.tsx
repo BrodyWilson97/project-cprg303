@@ -48,7 +48,7 @@ interface PlaylistProps {
             },
         ]);
 
-        await deleteFile(userId, songId);
+        // await deleteFile(userId, songId);
         if (!fetchSongs) return;
 
         fetchSongs(userId); // Refresh the song list after deletion
