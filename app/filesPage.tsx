@@ -5,6 +5,7 @@ import { uploadFile } from "../lib/supabase_crud";
 import * as DocumentPicker from "expo-document-picker";
 import AntDesign from '@expo/vector-icons/AntDesign';
 import * as FileSystem from 'expo-file-system';
+import * as ImageManipulator from 'expo-image-manipulator';
 import { uploadProps, song } from "../constants/types";
 import { useRouter, useLocalSearchParams } from "expo-router";
 
@@ -37,25 +38,34 @@ export default function FilesPage(){
 
   const handleImagePick = async () => {
     const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ['images'],
-      allowsEditing: true,
-      aspect: [4, 3],
-      quality: 1,
+      mediaTypes: ['images']
     });
 
-    if(result  && !result.canceled) {
-      const base64File = await FileSystem.readAsStringAsync(result.assets[0].uri, {
-       encoding: 'base64'});
-        
-      setImage({
-        data: base64File, 
-        uri: result.assets[0].uri, 
-        type: result.assets[0].type || "image/jpeg"
-      });
+    if (result && !result.canceled) {
+      try {
+        // Compress the image using ImageManipulator
+        const compressedImage = await ImageManipulator.manipulateAsync(
+          result.assets[0].uri,
+          [{ resize: { width: 800 } }], // Resize the image to a width of 800px (adjust as needed)
+          { compress: 0.7, format: ImageManipulator.SaveFormat.JPEG } // Compress to 70% quality
+        );
 
-      setFilePreview(result.assets[0].uri);
+        const base64File = await FileSystem.readAsStringAsync(compressedImage.uri, {
+          encoding: 'base64',
+        });
+
+        setImage({
+          data: base64File,
+          uri: compressedImage.uri,
+          type: 'image/jpeg',
+        });
+
+        setFilePreview(compressedImage.uri);
+      } catch (error) {
+        console.error('Error compressing image:', error);
+        Alert.alert('Error', 'Failed to compress the image. Please try again.');
       }
-
+    }
   };
 
 

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, Image } from 'react-native';
 import  Slider  from '@react-native-community/slider';
 import { useRouter, useLocalSearchParams } from 'expo-router';
@@ -17,11 +17,30 @@ export default function NowPlayingScreen() {
     } = useAudioPlayerContext();
 
   const [isPlaying, setIsPlaying] = useState(false);
+  const [albumArt, setAlbumArt] = useState<string>('https://via.placeholder.com/300'); // Placeholder image URL
+  const [loading, setLoading] = useState(false);
   const router = useRouter();
 
+  const getAlbumArt = async (item: Track) => {
+    setLoading(true);
+    // Fetch the album art from the track object or a default URL
+    const url = currentTrack?.thumbnail;
+    if (!url) return;
+    setAlbumArt(url);
+    setLoading(false);
+  }
+
+  useEffect(() => {
+    getAlbumArt(currentTrack!);
+  }
+  , [currentTrack]);
+
   return (
+ 
     <View style={styles.container}>
       {/* Header */}
+      {!loading && (
+      <>
       <View style={styles.header}>
         <TouchableOpacity onPress={() => router.back()}>
           <Ionicons name="arrow-back" size={30} color="#000" />
@@ -33,11 +52,9 @@ export default function NowPlayingScreen() {
           <Ionicons name="home-outline" size={30} color="#000" />
         </TouchableOpacity>
       </View>
-
-
       {/* Album Art Placeholder */}
       <Image
-        source={{ uri: currentTrack?.thumbnail || 'https://via.placeholder.com/300' }}
+        source={{uri: albumArt}}
         style={styles.albumArt}/>
       
       {/* Song Info */}
@@ -58,6 +75,8 @@ export default function NowPlayingScreen() {
       <View style={styles.jankyFooter}>
         <FooterBar/>
       </View>
+      </>
+    )}
     </View>
   );
 }
