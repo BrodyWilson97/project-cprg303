@@ -102,7 +102,7 @@ export default function FilesPage(){
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Files Page</Text>
+
       <Text style={styles.description}>Select and upload your files</Text>
 
       {/* Image Upload */}
@@ -168,13 +168,9 @@ const styles = StyleSheet.create({
     backgroundColor: "#E9D8FD",
     padding: 16,
     alignItems: "center",
+    paddingTop: 52,
   },
-  title: {
-    fontSize: 24,
-    fontWeight: "bold",
-    marginBottom: 16,
-    color: "#000",
-  },
+
   description: {
     fontSize: 16,
     color: "#4A5568",
@@ -187,7 +183,8 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
     paddingHorizontal: 20,
     borderRadius: 8,
-    marginVertical: 10,
+    position: "absolute",
+    bottom: 20,
   },
   buttonText: {
     fontSize: 16,
@@ -202,7 +199,7 @@ const styles = StyleSheet.create({
   },
 uploadBox: {
   width: '80%',
-  height: 100,
+  height: '20%',
   borderWidth: 2,
   borderColor: '#CBD5E0',
   borderStyle: 'dashed',

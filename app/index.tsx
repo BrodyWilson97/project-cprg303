@@ -142,6 +142,7 @@ const styles = StyleSheet.create({
   checkboxLabel: {
     fontSize: 14,
     color: "#4A5568",
+    marginLeft: 4,
   },
   links: {
     flexDirection: "row",

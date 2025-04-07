@@ -57,7 +57,14 @@ export default function HomeScreen() {
       
 
       {/* Music Thumbnails */}
+      <Text style={styles.title}>Recents</Text>
       <View style={styles.thumbnails}>
+        <View style={styles.thumbnail}>
+          <Text>🖼️</Text>
+        </View>
+        <View style={styles.thumbnail}>
+          <Text>🖼️</Text>
+        </View>
         <View style={styles.thumbnail}>
           <Text>🖼️</Text>
         </View>
@@ -89,6 +96,15 @@ const styles = StyleSheet.create({
     padding: 12,
     borderRadius: 50,
     marginTop: 50, // lowered even more
+  },
+  title: {
+    fontSize: 24,
+    fontWeight: "bold",
+    marginBottom: 16,
+    marginTop: 16,
+    color: "#000",
+    alignSelf: 'flex-start',
+    marginLeft: 32,
   },
   icon: {
     color: '#000',
@@ -127,12 +143,13 @@ const styles = StyleSheet.create({
   thumbnails: {
     flexDirection: 'row',
     justifyContent: 'center',
+    flexWrap: 'wrap',
     gap: 16,
     marginBottom: 24,
   },
   thumbnail: {
-    width: 100,
-    height: 130,
+    width: '40%',
+    height: '50%',
     backgroundColor: '#CBD5E0',
     borderRadius: 12,
     alignItems: 'center',

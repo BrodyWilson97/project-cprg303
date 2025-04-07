@@ -59,8 +59,6 @@ const styles = StyleSheet.create({
         justifyContent: 'space-around',
         paddingVertical: 20,
         // borderRadius: 12,
-        borderBottomLeftRadius: 12,
-        borderBottomRightRadius: 12,
         borderTopWidth: 1,
         borderTopColor: '#E5E7EB',
         zIndex: 10,

@@ -79,6 +79,7 @@ const styles = StyleSheet.create({
     padding: 16,
     borderRadius: 24,
     alignItems: 'center',
+    marginBottom: 8,
   },
   logoutButtonText: {
     color: '#FFF',

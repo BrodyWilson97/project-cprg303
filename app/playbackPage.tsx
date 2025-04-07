@@ -48,9 +48,9 @@ export default function NowPlayingScreen() {
         {/* <TouchableOpacity onPress={() => router.push('/playlist')}>
           <AntDesign name="heart" size={30} color="#000" />
         </TouchableOpacity> */}
-        <TouchableOpacity onPress={() => router.push('/homePage')}>
+        {/* <TouchableOpacity onPress={() => router.push('/homePage')}>
           <Ionicons name="home-outline" size={30} color="#000" />
-        </TouchableOpacity>
+        </TouchableOpacity> */}
       </View>
       {/* Album Art Placeholder */}
       <Image
@@ -95,12 +95,12 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     width: '100%',
     position: 'absolute',
-    top: 60,
+    top: 50,
     paddingHorizontal: 15,
   },  
   albumArt: {
-    width: 300,
-    height: 300,
+    width: '70%',
+    aspectRatio: 1,
     backgroundColor: '#E5E7EB',
     borderRadius: 16,
     marginBottom: 20,
