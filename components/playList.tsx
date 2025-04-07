@@ -1,125 +1,144 @@
 import React from 'react';
-import { FlatList, TouchableOpacity, Text, View, Alert, Image, ScrollView, StyleSheet } from 'react-native';
+import { TouchableOpacity, Text, View, Alert, Image, ScrollView, StyleSheet } from 'react-native';
 import { Track, useAudioPlayerContext } from '../context/audio-player-context';
-import { getFileURL, deleteFile, } from "../lib/supabase_crud";
-import { useRouter, useLocalSearchParams } from 'expo-router';
+import { useRouter } from 'expo-router';
+import { deleteFile, getFileURL } from '../lib/supabase_crud';
 
 interface PlaylistProps {
-    fetchSongs?: (userId: string) => void; // Function parameter as a prop
-    userId: string; 
-  }
-  
-  export const Playlist: React.FC<PlaylistProps> = ({ fetchSongs, userId }) => {
-    const { 
-        playlist,
-        playTrack, 
-        setCurrentTrack, //sets current track state in audioplayer context 
-    } = useAudioPlayerContext();
-    
+    songs?: Track[];          // Optional prop for songs (uses context if not provided)
+    userId: string;           // Required user ID
+    onPlay?: (song: Track) => void;  // Optional play handler
+    onDelete?: (songId: string) => void; // Optional delete handler
+    fetchSongs?: (userId: string) => void; // Optional refresh function
+}
+
+export const Playlist: React.FC<PlaylistProps> = ({ 
+    songs, 
+    userId, 
+    onPlay, 
+    onDelete,
+    fetchSongs 
+}) => {
     const router = useRouter();
+    const { playTrack, setCurrentTrack, playlist: contextPlaylist } = useAudioPlayerContext();
 
-    const clickSong = async (item: Track) => {
-        const url = await getFileURL("musicfiles", userId, item.id.toString(), 10000, "audio"); //fetch the file URL from supabase
-        item.uri = url; //set the uri of the track to the file URL
-        setCurrentTrack(item); //set current track state in audioplayer context
+    // Use props.songs if provided, otherwise use context playlist
+    const displaySongs = songs || contextPlaylist;
 
-        playTrack(item); //play the track
-        //go to playback page
-        router.push({ pathname: '/playbackPage' });
-    }
-
-    const deleteSong = async (userId: string, songId: string)=> {
-        await deleteFile(userId, songId);
-        if (!fetchSongs) return;
-
-        fetchSongs(userId); // Refresh the song list after deletion
-    }
-    
-    const handleDelete = async (userId: string, songId: string) => {
-
-        Alert.alert("Delete song", "Are you sure you want to delete this song?", [
-            {
-            text: "Cancel",
-            style: "cancel",
-            },
-            {
-            text: "OK",
-            onPress: () => deleteSong(userId, songId),
-            },
-        ]);
-
-        // await deleteFile(userId, songId);
-        if (!fetchSongs) return;
-
-        fetchSongs(userId); // Refresh the song list after deletion
+    const handlePlay = async (item: Track) => {
+        if (onPlay) {
+            onPlay(item); // Use prop callback if provided
+        } else {
+            // Default implementation if no onPlay provided
+            const url = await getFileURL("musicfiles", userId, item.id.toString(), 10000, "audio");
+            item.uri = url;
+            setCurrentTrack(item);
+            playTrack(item);
+            router.push({ pathname: '/playbackPage' });
+        }
     };
 
-  return (
-      <ScrollView style={styles.songList}>
-            {playlist.map((song, index) => (
-              <TouchableOpacity key={index} style={styles.songItem} onPress={() => clickSong(song)}>
-              <Image
-                source={{
-                  uri: song.thumbnail,}}
-                style={{ width: 50, height: 50 }}
-              />
-                <View style={{ width: "65%" }}>
-                  <Text style={styles.songTitle}>{song.title}</Text>
-                  <Text style={styles.songArtist}>{song.artist}</Text>
-                </View>
-                <TouchableOpacity onPress={() => handleDelete(userId, song.id.toString())}>
-                  <Text style={{ fontSize: 20 }}>...</Text>
+    const handleDelete = (songId: string) => {
+        Alert.alert("Delete song", "Are you sure you want to delete this song?", [
+            {
+                text: "Cancel",
+                style: "cancel",
+            },
+            {
+                text: "OK",
+                onPress: () => {
+                    if (onDelete) {
+                        onDelete(songId); // Use prop callback if provided
+                    } else if (fetchSongs) {
+                        // Default implementation
+                        deleteFile(userId, songId).then(() => fetchSongs(userId));
+                    }
+                },
+            },
+        ]);
+    };
+
+    return (
+        <ScrollView 
+            style={styles.songList}
+            contentContainerStyle={{ paddingBottom: 20 }}
+        >
+            {displaySongs.map((song) => (
+                <TouchableOpacity 
+                    key={song.id} 
+                    style={styles.songItem} 
+                    onPress={() => handlePlay(song)}
+                >
+                    <Image
+                        source={{ uri: song.thumbnail }}
+                        style={styles.songImage}
+                    />
+                    <View style={styles.songInfo}>
+                        <Text 
+                            style={styles.songTitle} 
+                            numberOfLines={1}
+                            ellipsizeMode="tail"
+                        >
+                            {song.title}
+                        </Text>
+                        <Text 
+                            style={styles.songArtist}
+                            numberOfLines={1}
+                            ellipsizeMode="tail"
+                        >
+                            {song.artist}
+                        </Text>
+                    </View>
+                    <TouchableOpacity 
+                        onPress={() => handleDelete(song.id.toString())}
+                        style={styles.deleteButton}
+                    >
+                        <Text style={styles.deleteIcon}>⋯</Text>
+                    </TouchableOpacity>
                 </TouchableOpacity>
-              </TouchableOpacity>
             ))}
         </ScrollView>
-
-    //   <FlatList
-    //     style={styles.songList}
-    //       data={playlist}
-    //       keyExtractor={(item) => item.id.toString()}
-    //       renderItem={({ item }) => (
-    //           <TouchableOpacity 
-    //               onPress={() => clickSong(item)}
-    //               style={{ 
-    //                   backgroundColor: item.id === currentTrack?.id ? '#B794F4' : 'transparent' 
-    //               }}
-    //           >
-    //               <Text>{item.title}</Text>
-    //               <Text>{item.artist}</Text>
-    //           </TouchableOpacity>
-    //       )}        
-          //ListEmptyComponent={<Text>No songs in playlist</Text>}
-                // ** Optional extra FlatList features **
-          // ItemSeparatorComponent={() => <View style={styles.separator} />} // Divider between items
-          // onEndReached={loadMoreSongs} // Infinite loading
-          // refreshControl={/* Pull-to-refresh */}
-  );
+    );
 };
 
 const styles = StyleSheet.create({
     songList: {
         width: '100%',
-        //maxWidth: 400,
-      },
-      songItem: {
+        flex: 1,
+    },
+    songItem: {
         backgroundColor: '#D6BCFA',
         padding: 12,
         marginBottom: 8,
         borderRadius: 8,
         flexDirection: "row",
+        alignItems: 'center',
+    },
+    songImage: {
+        width: 50, 
+        height: 50,
+        borderRadius: 4,
+    },
+    songInfo: {
         flex: 1,
-        columnGap: 20,
-      },
-      songTitle: {
+        marginHorizontal: 12,
+        overflow: 'hidden',
+    },
+    songTitle: {
         fontSize: 16,
         fontWeight: '500',
         color: '#000',
-        paddingBottom: 4,
-      },
-      songArtist: {
+    },
+    songArtist: {
         fontSize: 14,
         color: '#4A5568',
-      },
-    }
-);
+        marginTop: 4,
+    },
+    deleteButton: {
+        padding: 8,
+    },
+    deleteIcon: {
+        fontSize: 20,
+        color: '#4A5568',
+    },
+});

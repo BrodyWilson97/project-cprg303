@@ -7,10 +7,13 @@ import { playlist } from "../constants/types";
 import { useAudioPlayerContext } from '../context/audio-player-context';
 import { Playlist } from '../components/playList';
 import { AudioPlayerControlsFooter } from '../components/audioControlsFooter';
+import { SearchBar } from '../components/searchBar';
 import FooterBar from '../components/footerBar';
+import { Track } from '../context/audio-player-context';
 
 export default function LibraryPage() {
   const { 
+    playlist,
     setPlaylist,   
     setCurrentTrack 
   } = useAudioPlayerContext();
@@ -53,13 +56,31 @@ export default function LibraryPage() {
     fetchPlaylists();
   }, []);
 
+  // =========================== Search Functionality ==============================
+  const [searchQuery, setSearchQuery] = useState('');
+  const [filteredSongs, setFilteredSongs] = useState<Track[]>([]);
+  const [filteredPlaylists, setFilteredPlaylists] = useState<playlist[]>([]);
+
+  useEffect(() => {
+    if (searchQuery) {
+      const filtered = playlist.filter(item => 
+        item.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        (item.artist && item.artist.toLowerCase().includes(searchQuery.toLowerCase()))
+      );
+      setFilteredSongs(filtered);
+    } else {
+      setFilteredSongs([]); // Reset when search is empty
+    }
+  }, [searchQuery, playlist]);
+
   return (
     <View style={styles.container}>
       {/* Search Bar */}
-      <View style={styles.searchBar}>
+      <SearchBar placeholder='Search Music...' value={searchQuery} onChangeText={setSearchQuery}/>
+      {/* <View style={styles.searchBar}>
         <Ionicons name="search-outline" size={30} color="#000" style={styles.icon}/>
         <TextInput placeholder="Search music..." style={styles.searchInput} />
-      </View>
+      </View> */}
 
       {/* Tabs for Songs and Playlists */}
       <View style={styles.tabNavigation}>
@@ -79,19 +100,19 @@ export default function LibraryPage() {
         </TouchableOpacity>
       </View>
 
-      {/* Conditional Rendering */}
+      {/* Conditional Rendering of Songs or Playlists */}
       {activeTab === 'songs' ? 
-        (loading ? <Text>Loading...</Text> : <Playlist fetchSongs={fetchSongs} userId={userID} />) :
+        (loading ? <Text>Loading...</Text> : 
+          <Playlist 
+            songs={searchQuery ? filteredSongs : playlist} 
+            userId={userID}
+          />
+        ) :
         (loading ? <Text>Loading...</Text> :
-          <ScrollView 
-            style={styles.playlistList}
-            contentContainerStyle={{ 
-              paddingBottom: 100,
-              paddingTop: 20,}}
-          >
-            {playlists.map((playlist, index) => (
+          <ScrollView style={styles.playlistList} contentContainerStyle={{ paddingBottom: 50}}>
+            {(searchQuery ? filteredPlaylists : playlists).map((playlist) => (
               <TouchableOpacity 
-                key={index} 
+                key={playlist.id} 
                 style={styles.playlistItem} 
                 onPress={() => router.push(`/viewPlaylistPage/?userID=${userID}&playlistID=${playlist.id}&playlistName=${playlist.playlistName}`)}
               >
@@ -182,6 +203,8 @@ const styles = StyleSheet.create({
     flex: 1,
     maxWidth: 400,
     marginTop: 20,
+    paddingBottom: 100,
+    marginBottom: 24,
   },
   playlistItem: {
     backgroundColor: '#D6BCFA',
