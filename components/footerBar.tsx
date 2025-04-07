@@ -53,7 +53,7 @@ const styles = StyleSheet.create({
         // bottom: 0,
         backgroundColor: '#B794F4',
         width: '100%',
-        maxWidth: 400,
+
         flexDirection: 'row',
         paddingBottom: 30,
         justifyContent: 'space-around',
