@@ -100,6 +100,16 @@ export default function LibraryPage() {
         </TouchableOpacity>
       </View>
 
+      {/* Manage Playlists Button */}
+      {activeTab === 'playlists' && (
+        <TouchableOpacity
+          style={styles.manageButton}
+          onPress={() => router.push(`/playlistPage/?userID=${userID}`)}
+        >
+          <Text style={styles.buttonText}>Manage Playlists</Text>
+        </TouchableOpacity>
+      )}
+
       {/* Conditional Rendering of Songs or Playlists */}
       {activeTab === 'songs' ? 
         (loading ? <Text>Loading...</Text> : 
@@ -109,6 +119,7 @@ export default function LibraryPage() {
           />
         ) :
         (loading ? <Text>Loading...</Text> :
+          
           <ScrollView style={styles.playlistList} contentContainerStyle={{ paddingBottom: 50}}>
             {(searchQuery ? filteredPlaylists : playlists).map((playlist) => (
               <TouchableOpacity 
@@ -121,17 +132,7 @@ export default function LibraryPage() {
             ))}
           </ScrollView>
         )
-      }
-
-      {/* Manage Playlists Button */}
-      {activeTab === 'playlists' && (
-        <TouchableOpacity
-          style={styles.manageButton}
-          onPress={() => router.push(`/playlistPage/?userID=${userID}`)}
-        >
-          <Text style={styles.buttonText}>Manage Playlists</Text>
-        </TouchableOpacity>
-      )}
+    }
         
         {/* Now Playing Section */}
       <AudioPlayerControlsFooter/>
@@ -209,6 +210,7 @@ const styles = StyleSheet.create({
   playlistItem: {
     backgroundColor: '#D6BCFA',
     padding: 12,
+    height: 45,
     marginBottom: 8,
     borderRadius: 8,
   },
@@ -218,10 +220,9 @@ const styles = StyleSheet.create({
   },
   manageButton: {
     backgroundColor: '#9F7AEA',
-    paddingVertical: 12,
-    paddingHorizontal: 20,
+    paddingVertical: 8,
+    paddingHorizontal: 8,
     borderRadius: 8,
-    marginVertical: 10,
   },
   buttonText: {
     fontSize: 16,
