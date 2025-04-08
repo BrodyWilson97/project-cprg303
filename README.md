@@ -2,4 +2,4 @@ The API keys are in the .env file already, they will be reset after the project 
 
 Log in with testemail@gmail.com and password or create a new account
 
-The supabase usage call limit has been reached until April 9th, the upload and delete functions will not work until it resets.
+The supabase usage call limit has been reached until May 6th so the upload and delete functions are slower than they should be and the music sometimes lags.
