@@ -175,7 +175,22 @@ export async function getPlaylistSongs(userId: string, playlistId: string) {
         return null;
     }
 
-    return data;
+    const combinedData: song[] = await Promise.all(
+        data.map(async (songItem) => {
+            let imgUrl = await getFileURL("imagefiles", userId, songItem.id, 100000, "image");
+
+            if (!imgUrl) {
+                imgUrl = 'https://community.magicmusic.net/media/unknown-album.294/full?d=1443476842';
+            }
+
+            return {
+                ...songItem,
+                imageURL: imgUrl,
+            };
+        })
+    );
+
+    return combinedData ? combinedData : [];
 }
 
 export async function deletePlaylist(playlistId: string) {

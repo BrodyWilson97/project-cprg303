@@ -4,6 +4,7 @@ import { useRouter, useLocalSearchParams } from 'expo-router';
 import AddSongsPopUp from './addSongsPopUp'; 
 import { song } from '../constants/types'; 
 import { uploadPlaylist, listPlaylists, deletePlaylist, editPlaylist } from '../lib/supabase_crud';
+import { AudioPlayerControlsFooter } from '../components/audioControlsFooter';
 import { playlist } from '../constants/types'; 
 
 export default function PlaylistPage() {
@@ -120,20 +121,8 @@ export default function PlaylistPage() {
       )}
 
       {/* Bottom Navigation */}
-      <View style={styles.bottomNav}>
-        <TouchableOpacity onPress={() => router.push('/homePage')}>
-          <Text style={styles.navIcon}>🏠</Text>
-          <Text style={styles.navLabel}>Home</Text>
-        </TouchableOpacity>
-        <TouchableOpacity onPress={() => router.back()}>
-          <Text style={styles.navIcon}>🎵</Text>
-          <Text style={styles.navLabel}>Songs</Text>
-        </TouchableOpacity>
-        <TouchableOpacity onPress={() => router.push('/settingsPage')}>
-          <Text style={styles.navIcon}>⚙️</Text>
-          <Text style={styles.navLabel}>Settings</Text>
-        </TouchableOpacity>
-      </View>
+      <AudioPlayerControlsFooter/>
+
     </View>
   );
 }
